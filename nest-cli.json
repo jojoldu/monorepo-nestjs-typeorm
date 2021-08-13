@@ -1,0 +1,48 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/monorepo-nestjs-typeorm/src",
+  "monorepo": true,
+  "root": "apps/monorepo-nestjs-typeorm",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/monorepo-nestjs-typeorm/tsconfig.app.json"
+  },
+  "projects": {
+    "monorepo-nestjs-typeorm": {
+      "type": "application",
+      "root": "apps/monorepo-nestjs-typeorm",
+      "entryFile": "main",
+      "sourceRoot": "apps/monorepo-nestjs-typeorm/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/monorepo-nestjs-typeorm/tsconfig.app.json"
+      }
+    },
+    "entity": {
+      "type": "library",
+      "root": "libs/entity",
+      "entryFile": "index",
+      "sourceRoot": "libs/entity/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/entity/tsconfig.lib.json"
+      }
+    },
+    "api": {
+      "type": "application",
+      "root": "apps/api",
+      "entryFile": "main",
+      "sourceRoot": "apps/api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api/tsconfig.app.json"
+      }
+    },
+    "admin": {
+      "type": "application",
+      "root": "apps/admin",
+      "entryFile": "main",
+      "sourceRoot": "apps/admin/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/admin/tsconfig.app.json"
+      }
+    }
+  }
+}
