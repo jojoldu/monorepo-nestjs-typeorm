@@ -8,15 +8,6 @@
     "tsConfigPath": "apps/monorepo-nestjs-typeorm/tsconfig.app.json"
   },
   "projects": {
-    "monorepo-nestjs-typeorm": {
-      "type": "application",
-      "root": "apps/monorepo-nestjs-typeorm",
-      "entryFile": "main",
-      "sourceRoot": "apps/monorepo-nestjs-typeorm/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/monorepo-nestjs-typeorm/tsconfig.app.json"
-      }
-    },
     "entity": {
       "type": "library",
       "root": "libs/entity",
