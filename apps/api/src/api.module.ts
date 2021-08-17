@@ -5,6 +5,7 @@ import { EntityService } from '@app/entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { User } from '@app/entity/user/User';
+import { UsersModule } from '@app/entity/user/UsersModule';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { User } from '@app/entity/user/User';
       synchronize: true,
       namingStrategy: new SnakeNamingStrategy(),
     }),
+    UsersModule,
   ],
   controllers: [ApiController],
   providers: [ApiService, EntityService],
