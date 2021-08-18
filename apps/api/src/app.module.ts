@@ -1,12 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ApiController } from './api.controller';
-import { ApiService } from './api.service';
-import { EntityService } from '@app/entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { User } from '@app/entity/user/User.entity';
-import { UserModule } from '@app/entity/user/UserModule';
-import { UserEntityRepository } from '@app/entity/user/UserEntityRepository';
+import { UserApiModule } from './order/UserApiModule';
 
 @Module({
   imports: [
@@ -21,9 +17,7 @@ import { UserEntityRepository } from '@app/entity/user/UserEntityRepository';
       synchronize: true,
       namingStrategy: new SnakeNamingStrategy(),
     }),
-    UserModule,
+    UserApiModule,
   ],
-  controllers: [ApiController],
-  providers: [ApiService, EntityService, UserEntityRepository],
 })
 export class AppModule {}
