@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { User } from '@app/entity/user/User.entity';
-import { UserApiModule } from './order/UserApiModule';
+import { UserApiModule } from './user/UserApiModule';
 
 @Module({
   imports: [
@@ -20,4 +20,4 @@ import { UserApiModule } from './order/UserApiModule';
     UserApiModule,
   ],
 })
-export class AppModule {}
+export class ApiAppModule {}
