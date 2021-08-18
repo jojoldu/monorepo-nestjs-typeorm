@@ -4,8 +4,9 @@ import { ApiService } from './api.service';
 import { EntityService } from '@app/entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import { User } from '@app/entity/user/User';
-import { UsersModule } from '@app/entity/user/UsersModule';
+import { User } from '@app/entity/user/User.entity';
+import { UserModule } from '@app/entity/user/UserModule';
+import { UserEntityRepository } from '@app/entity/user/UserEntityRepository';
 
 @Module({
   imports: [
@@ -20,9 +21,9 @@ import { UsersModule } from '@app/entity/user/UsersModule';
       synchronize: true,
       namingStrategy: new SnakeNamingStrategy(),
     }),
-    UsersModule,
+    UserModule,
   ],
   controllers: [ApiController],
-  providers: [ApiService, EntityService],
+  providers: [ApiService, EntityService, UserEntityRepository],
 })
-export class ApiModule {}
+export class AppModule {}
