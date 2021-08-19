@@ -7,14 +7,14 @@ import { User } from '@app/entity/user/User.entity';
 @Controller()
 export class UserApiController {
   constructor(
-    private readonly apiService: UserApiService,
+    private readonly userApiService: UserApiService,
     private readonly entityService: EntityService,
     private readonly userRepository: UserEntityRepository,
   ) {}
 
   @Get()
   getHello(): string {
-    return this.apiService.getHello();
+    return this.userApiService.getHello();
   }
 
   @Get('/entity')

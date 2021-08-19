@@ -7,15 +7,6 @@ import { instance, mock, when } from 'ts-mockito';
 describe('UserApiController', () => {
   let userApiController: UserApiController;
 
-  beforeEach(async () => {
-    // const app: TestingModule = await Test.createTestingModule({
-    //   controllers: [UserApiController],
-    //   providers: [UserApiService],
-    // }).compile();
-    //
-    // userApiController = app.get<UserApiController>(UserApiController);
-  });
-
   describe('root', () => {
     it('should return "Hello World!"', () => {
       userApiController = new UserApiController(
