@@ -10,7 +10,7 @@ describe('UserApiController', () => {
   describe('root', () => {
     it('should return "Hello World!"', () => {
       userApiController = new UserApiController(
-        new UserApiService(),
+        new UserApiService(null),
         null,
         null,
       );
