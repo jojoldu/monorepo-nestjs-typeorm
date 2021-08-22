@@ -24,6 +24,6 @@ export class UserApiController {
 
   @Get('/users')
   async getUsers(): Promise<User[]> {
-    return await this.userRepository.findAll();
+    return await this.userApiService.findAll();
   }
 }

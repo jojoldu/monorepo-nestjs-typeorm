@@ -1,11 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { UserEntityRepository } from '@app/entity/user/UserEntityRepository';
+import { UserQueryRepository } from '@app/entity/user/UserQueryRepository';
+import { User } from '@app/entity/user/User.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserApiService {
-  constructor(private readonly userRepository: UserEntityRepository) {}
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    private readonly userQueryRepository: UserQueryRepository,
+  ) {}
 
   getHello(): string {
     return 'Hello World!';
+  }
+
+  async findAll(): Promise<User[]> {
+    return await this.userRepository.find();
   }
 }

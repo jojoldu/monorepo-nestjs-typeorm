@@ -40,5 +40,5 @@ export class User {
 
 ```typescript
 @EntityRepository(User)
-export class UserCoreRepository extends Repository<User> {}
+export class UserQueryRepository extends Repository<User> {}
 ```

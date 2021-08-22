@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserCoreRepository } from '@app/entity/user/UserCoreRepository';
+import { UserQueryRepository } from '@app/entity/user/UserQueryRepository';
 import { User } from '@app/entity/user/User.entity';
 
 describe('UserCoreRepository', () => {
-  let repository: UserCoreRepository;
+  let repository: UserQueryRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserCoreRepository],
+      providers: [UserQueryRepository],
     }).compile();
 
-    repository = module.get<UserCoreRepository>(UserCoreRepository);
+    repository = module.get<UserQueryRepository>(UserQueryRepository);
   });
 
   it('save', async () => {
