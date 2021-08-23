@@ -1,13 +1,15 @@
 import { Controller, Get } from '@nestjs/common';
 import { UserAdminService } from './UserAdminService';
 import { User } from '@app/entity/user/User.entity';
-import { UserEntityRepository } from '@app/entity/user/UserEntityRepository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Controller()
 export class UserAdminController {
   constructor(
     private readonly adminService: UserAdminService,
-    private readonly userRepository: UserEntityRepository,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   @Get()
@@ -17,6 +19,6 @@ export class UserAdminController {
 
   @Get('/users')
   async getUsers(): Promise<User[]> {
-    return await this.userRepository.findAll();
+    return await this.userRepository.find();
   }
 }

@@ -1,7 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { UserApiService } from './UserApiService';
 import { EntityService } from '@app/entity';
-import { UserEntityRepository } from '@app/entity/user/UserEntityRepository';
 import { User } from '@app/entity/user/User.entity';
 
 @Controller()
@@ -9,7 +8,6 @@ export class UserApiController {
   constructor(
     private readonly userApiService: UserApiService,
     private readonly entityService: EntityService,
-    private readonly userRepository: UserEntityRepository,
   ) {}
 
   @Get()
