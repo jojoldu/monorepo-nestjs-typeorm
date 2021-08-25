@@ -5,15 +5,15 @@ import { UserName } from '@app/entity/user/UserName';
 
 @EntityRepository(User)
 export class UserQueryRepository extends Repository<User> {
-  async findUserName(userId: number): Promise<UserName[]> {
+  async findUserName(userId: number): Promise<UserName> {
     const queryBuilder = createQueryBuilder()
       .select(['user.firstName AS firstName', 'user.lastName AS lastName'])
       .from(User, 'user')
       .where(`user.id =:id`, { id: userId });
 
-    console.log(queryBuilder.getQuery());
-
     const row = await queryBuilder.getRawOne();
-    return plainToClass(UserName, [row], { excludeExtraneousValues: true });
+    console.log(`id=${userId}, ${JSON.stringify(row)}`);
+    return plainToClass(UserName, row, { excludeExtraneousValues: true });
+    // return Object.assign(UserName, row);
   }
 }

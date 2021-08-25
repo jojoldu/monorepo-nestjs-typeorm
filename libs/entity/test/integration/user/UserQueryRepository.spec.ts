@@ -23,6 +23,7 @@ describe('UserCoreRepository', () => {
           database: 'test',
           entities: [User],
           synchronize: true,
+          logging: true,
           namingStrategy: new SnakeNamingStrategy(),
         }),
       ],
@@ -32,16 +33,19 @@ describe('UserCoreRepository', () => {
     userRepository = module.get('UserRepository');
   });
 
+  afterEach(async () => {
+    await userRepository.clear();
+  });
+
   it('save', async () => {
     const firstName = 'Lee';
     const lastName = 'Donguk';
     const user = new User();
     user.firstName = firstName;
     user.lastName = lastName;
-    await userRepository.save(user);
+    const savedUser = await userRepository.save(user);
 
-    const result = await userQueryRepository.findUserName(1);
-    expect(result).toHaveLength(1);
-    expect(result[0].name).toBe(`${firstName} ${lastName}`);
+    const result = await userQueryRepository.findUserName(savedUser.id);
+    expect(result.getFullName()).toBe(`${firstName} ${lastName}`);
   });
 });

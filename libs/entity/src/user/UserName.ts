@@ -1,8 +1,11 @@
+import { Expose } from 'class-transformer';
+
 export class UserName {
   firstName: string;
   lastName: string;
 
-  get name(): string {
+  // @Expose()
+  getFullName(): string {
     return `${this.firstName} ${this.lastName}`;
   }
 }
