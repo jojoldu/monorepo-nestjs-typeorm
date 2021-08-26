@@ -7,13 +7,11 @@ import { UserName } from '@app/entity/user/UserName';
 export class UserQueryRepository extends Repository<User> {
   async findUserName(userId: number): Promise<UserName> {
     const queryBuilder = createQueryBuilder()
-      .select(['user.firstName AS firstName', 'user.lastName AS lastName'])
+      .select(['user.firstName', 'user.lastName'])
       .from(User, 'user')
       .where(`user.id =:id`, { id: userId });
 
-    const row = await queryBuilder.getRawOne();
-    console.log(`id=${userId}, ${JSON.stringify(row)}`);
-    return plainToClass(UserName, row, { excludeExtraneousValues: true });
-    // return Object.assign(UserName, row);
+    const row = await queryBuilder.getOne();
+    return plainToClass(UserName, row);
   }
 }

@@ -46,6 +46,7 @@ describe('UserCoreRepository', () => {
     const savedUser = await userRepository.save(user);
 
     const result = await userQueryRepository.findUserName(savedUser.id);
+    console.log(`result=${JSON.stringify(result)}`);
     expect(result.getFullName()).toBe(`${firstName} ${lastName}`);
   });
 });
