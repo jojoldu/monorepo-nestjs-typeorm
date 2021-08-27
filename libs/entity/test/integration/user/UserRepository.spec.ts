@@ -1,12 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserQueryRepository } from '@app/entity/user/UserQueryRepository';
 import { User } from '@app/entity/user/User.entity';
 import { Repository } from 'typeorm';
 import { UserModule } from '@app/entity/user/UserModule';
 import { getTestTypeOrmModule } from '../getTestTypeOrmModule';
 
-describe('UserQueryRepository', () => {
-  let userQueryRepository: UserQueryRepository;
+describe('UserCoreRepository', () => {
   let userRepository: Repository<User>;
 
   beforeAll(async () => {
@@ -14,7 +12,6 @@ describe('UserQueryRepository', () => {
       imports: [UserModule, getTestTypeOrmModule()],
     }).compile();
 
-    userQueryRepository = module.get<UserQueryRepository>(UserQueryRepository);
     userRepository = module.get('UserRepository');
   });
 
@@ -30,9 +27,8 @@ describe('UserQueryRepository', () => {
     user.lastName = lastName;
     const savedUser = await userRepository.save(user);
 
-    const result = await userQueryRepository.findUserName(savedUser.id);
-    console.log(`result=${JSON.stringify(result)}`);
-    expect(result.getFullName()).toBe(`${firstName} ${lastName}`);
+    console.log(`result=${JSON.stringify(savedUser)}`);
+    expect(savedUser.id).toBeGreaterThanOrEqual(1);
   });
 
   it('save2', async () => {
@@ -43,8 +39,7 @@ describe('UserQueryRepository', () => {
     user.lastName = lastName;
     const savedUser = await userRepository.save(user);
 
-    const result = await userQueryRepository.findUserName(savedUser.id);
-    console.log(`result=${JSON.stringify(result)}`);
-    expect(result.getFullName()).toBe(`${firstName} ${lastName}`);
+    console.log(`result=${JSON.stringify(savedUser)}`);
+    expect(savedUser.id).toBeGreaterThanOrEqual(1);
   });
 });
