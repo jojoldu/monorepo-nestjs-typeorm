@@ -13,4 +13,11 @@ export class User {
 
   @Column({ default: true })
   isActive: boolean;
+
+  static byName(firstName: string, lastName: string) {
+    const user = new User();
+    user.firstName = firstName;
+    user.lastName = lastName;
+    return user;
+  }
 }

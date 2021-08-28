@@ -1,5 +1,5 @@
-import { UserApiController } from '../../src/user/UserApiController';
-import { UserApiService } from '../../src/user/UserApiService';
+import { UserApiController } from '../../../src/user/UserApiController';
+import { UserApiService } from '../../../src/user/UserApiService';
 import { User } from '@app/entity/user/User.entity';
 import { instance, mock, when } from 'ts-mockito';
 

@@ -18,7 +18,7 @@ describe('UserQueryRepository', () => {
     userRepository = module.get('UserRepository');
   });
 
-  afterEach(async () => {
+  beforeEach(async () => {
     await userRepository.clear();
   });
 
