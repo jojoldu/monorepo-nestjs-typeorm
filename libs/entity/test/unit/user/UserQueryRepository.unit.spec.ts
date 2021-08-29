@@ -3,7 +3,7 @@ import { UserQueryRepository } from '@app/entity/user/UserQueryRepository';
 import { User } from '@app/entity/user/User.entity';
 import { Repository } from 'typeorm';
 import { UserModule } from '@app/entity/user/UserModule';
-import { getSqliteTestTypeOrmModule } from '../getSqliteTestTypeOrmModule';
+import { getSqliteTestTypeOrmModule } from '../../../getSqliteTestTypeOrmModule';
 
 describe('UserQueryRepository', () => {
   let userQueryRepository: UserQueryRepository;

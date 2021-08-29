@@ -1,4 +1,3 @@
-import { User } from '@app/entity/user/User.entity';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
@@ -13,7 +12,7 @@ class TypeOrmConfigService implements TypeOrmOptionsFactory {
       username: 'test',
       password: 'test',
       database: 'test',
-      entities: [User],
+      entities: [__dirname + '/../**/*.entity.ts'],
       synchronize: true,
       namingStrategy: new SnakeNamingStrategy(),
     };

@@ -9,7 +9,7 @@ export function getPgTestTypeOrmModule() {
     username: 'test',
     password: 'test',
     database: 'test',
-    entities: [__dirname + '/libs/entity/src/**/*.entity{.ts,.js}'],
+    entities: [__dirname + '/../**/*.entity.ts'],
     synchronize: true,
     namingStrategy: new SnakeNamingStrategy(),
   });

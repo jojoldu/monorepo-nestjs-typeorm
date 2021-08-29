@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '@app/entity/user/User.entity';
 import { Repository } from 'typeorm';
 import { UserModule } from '@app/entity/user/UserModule';
-import { getSqliteTestTypeOrmModule } from '../getSqliteTestTypeOrmModule';
+import { getSqliteTestTypeOrmModule } from '../../../getSqliteTestTypeOrmModule';
 
 describe('UserCoreRepository', () => {
   let userRepository: Repository<User>;
