@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { User } from '@app/entity/user/User.entity';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserModule } from '@app/entity/user/UserModule';
-import { getTestTypeOrmModule } from '../../../../../libs/entity/test/integration/getTestTypeOrmModule';
+import { getSqliteTestTypeOrmModule } from '../../../../../libs/entity/test/unit/getSqliteTestTypeOrmModule';
 import { UserApiService } from '../../../src/user/UserApiService';
 
 describe('UserApiService', () => {
@@ -11,7 +11,7 @@ describe('UserApiService', () => {
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [UserModule, getTestTypeOrmModule()],
+      imports: [UserModule, getSqliteTestTypeOrmModule()],
       providers: [UserApiService],
     }).compile();
 

@@ -3,7 +3,7 @@ import { UserQueryRepository } from '@app/entity/user/UserQueryRepository';
 import { User } from '@app/entity/user/User.entity';
 import { Repository } from 'typeorm';
 import { UserModule } from '@app/entity/user/UserModule';
-import { getTestTypeOrmModule } from '../getTestTypeOrmModule';
+import { getSqliteTestTypeOrmModule } from '../getSqliteTestTypeOrmModule';
 
 describe('UserQueryRepository', () => {
   let userQueryRepository: UserQueryRepository;
@@ -11,7 +11,7 @@ describe('UserQueryRepository', () => {
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [UserModule, getTestTypeOrmModule()],
+      imports: [UserModule, getSqliteTestTypeOrmModule()],
     }).compile();
 
     userQueryRepository = module.get<UserQueryRepository>(UserQueryRepository);
