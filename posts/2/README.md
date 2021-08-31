@@ -113,3 +113,53 @@ export class UserQueryRepository extends Repository<User> {
     }
 }
 ```
+
+## 테스트
+
+![test-func](./images/test-func.png)
+
+```typescript
+export function getPgTestTypeOrmModule() {
+  return TypeOrmModule.forRoot({
+    type: 'postgres',
+    host: 'localhost',
+    port: 5432,
+    username: 'test',
+    password: 'test',
+    database: 'test',
+    entities: [__dirname + '/../**/*.entity.ts'],
+    synchronize: true,
+    namingStrategy: new SnakeNamingStrategy(),
+  });
+}
+```
+
+```typescript
+describe('UserCoreRepository', () => {
+  let userRepository: Repository<User>;
+
+  beforeAll(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [UserModule, getPgTestTypeOrmModule()],
+    }).compile();
+
+    userRepository = module.get('UserRepository');
+  });
+
+  beforeEach(async () => {
+    await userRepository.clear();
+  });
+
+  it('Docker PostgreSQL save', async () => {
+    const firstName = 'Lee';
+    const lastName = 'Donguk';
+    const user = new User();
+    user.firstName = firstName;
+    user.lastName = lastName;
+    const savedUser = await userRepository.save(user);
+
+    console.log(`result=${JSON.stringify(savedUser)}`);
+    expect(savedUser.id).toBeGreaterThanOrEqual(1);
+  });
+});
+```

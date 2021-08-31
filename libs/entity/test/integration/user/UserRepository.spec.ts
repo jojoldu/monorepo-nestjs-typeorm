@@ -19,7 +19,7 @@ describe('UserCoreRepository', () => {
     await userRepository.clear();
   });
 
-  it('save', async () => {
+  it('Docker PostgreSQL save', async () => {
     const firstName = 'Lee';
     const lastName = 'Donguk';
     const user = new User();
