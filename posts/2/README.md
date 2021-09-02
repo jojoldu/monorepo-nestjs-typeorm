@@ -128,11 +128,31 @@ export class UserModule {}
 유지보수와 확장성을 고려하면 Data Mapper를 선호하게 됩니다.  
   
 Data Mapper 패턴이 Active Record 패턴에 비해 가장 큰 차이점은, **도메인을 Persistence 와 완전히 분리**한다는 것입니다.  
+이를테면 Active Record 패턴은 **Model을 테이블로 바라봅니다**
+
+```typescript
+const ticket = Ticket.find(id);
+ticket.cancel();
+```
+
+* Ticket 클래스는 마치 **테이블처럼** 여러개의 row 중 하나를 찾아낼 수 있는 장소이며
+* 단일 객체의 행위를 관리하기도 합니다.
+
+반면에 DataMapper 패턴은 **Model을 도메인 객체로 바라봅니다**
+
+```typescript
+const ticket = ticketRepostiroy.find(id);
+ticket.cancel();
+```
+
+* 데이터베이스에 대한 조회는 Repository에서 처리후
+* 조회 이후, 해당 Ticket 도메인에 대한 행위 (`Method`) 와 상태 (`Field`) 를 가집니다.
+
 즉, Domain 객체와 Mapper를 분리해서 **데이터베이스를 Domain 객체에서 격리** 시킵니다.  
 이는 Entity 클래스가 **데이터베이스에 대해 전혀 이해할 필요가 없음** (의존성이 없는) 을 의미하기 때문에 **Domain clean**을 할 수 있게 됩니다.  
-이로인해 비지니스 로직이 매우 복잡한 경우 유지보수에 굉장히 큰 강점을 얻게 됩니다.   
+이로인해 비지니스 로직이 복잡한 경우 상대적으로 유지보수 하기가 쉬워집니다.     
   
-반대로 Active Record 패턴의 경우 아무래도 하나의 클래스에서 여러 역할 (Command와 Query)을 하기 때문에 조금만 서비스 규모가 커지면 코드 복잡도가 굉장히 높아집니다.  
+반대로 Active Record 패턴의 경우 서비스 규모가 커질수록 데이터베이스 쿼리에 대한 코드와 도메인 객체 코드가 모두 묶여있어, 코드 복잡도가 굉장히 높아집니다.  
   
 이외에도, 아래와 같은 **확장의 가능성**에 있어서도 장점을 얻습니다.
 
@@ -145,10 +165,19 @@ Data Mapper 패턴이 Active Record 패턴에 비해 가장 큰 차이점은, **
 일정 규모 이상의 서비스가 되면, 웹 서비스는 더이상 **데이터베이스와 특정 ORM에 종속적이지 않습니다**.  
 그래서 저 같은 경우에는 Data Mapper 패턴을 상당히 선호하게 됩니다.  
   
+자 이제 Entity 모듈만 한번 테스트해보겠습니다.
 
-## 테스트
+## 3. 테스트
 
-![test-func](./images/test-func.png)
+먼저 위에서 만들어두었던 `docker-compose` 를 실행해둡니다.
+
+> 다음편에서 `sqlite`를 통해 별도의 도커 실행 없이 단위 테스트를 진행하겠습니다.
+
+그리고 로컬에서 실행한 도커 PostgreSQL에 접근하기 위해 Config 파일을 하나 만들어두겠습니다.
+
+![pg-config](./images/pg-config.png)
+
+**libs/entity/getPgTestTypeOrmModule**
 
 ```typescript
 export function getPgTestTypeOrmModule() {
@@ -166,8 +195,14 @@ export function getPgTestTypeOrmModule() {
 }
 ```
 
+위 테스트 Config를 이제 테스트 코드에서도 동일하게 사용해봅니다.
+
+![test-func](./images/test-func.png)
+
+**libs/entity/test/unit/user/UserRepository.pg.spec.ts**
+
 ```typescript
-describe('UserCoreRepository', () => {
+describe('UserRepository PG', () => {
   let userRepository: Repository<User>;
 
   beforeAll(async () => {
@@ -195,3 +230,5 @@ describe('UserCoreRepository', () => {
   });
 });
 ```
+
+![test-result1](./images/test-result1.png)

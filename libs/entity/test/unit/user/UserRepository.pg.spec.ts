@@ -15,7 +15,7 @@ describe('UserCoreRepository', () => {
     userRepository = module.get('UserRepository');
   });
 
-  beforeEach(async () => {
+  afterEach(async () => {
     await userRepository.clear();
   });
 
