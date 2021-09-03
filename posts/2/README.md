@@ -9,8 +9,13 @@
 필요한 패키지들을 먼저 추가합니다.
 
 ```bash
-yarn add @nestjs/typeorm typeorm pg
+yarn add @nestjs/typeorm typeorm pg typeorm-naming-strategies class-transformer
 ```
+
+* `typeorm-naming-strategies`
+  * [TypeORM에서 Camelcase 필드를 Snake 컬럼에 매핑하기](https://jojoldu.tistory.com/568) 를 위해 사용됩니다. 
+* `class-transformer`
+  * Entity Json을 Dto Instance으로 편하게 변환하기 위해 사용합니다.
 
 그리고 TypeORM과 연동되어 로컬에서 실행할 PostgreSQL DB를 위해 `docker-compose.yml` 파일을 아래와 같이 생성합니다.
 
@@ -106,6 +111,9 @@ export class UserName {
 }
 ```
 
+* `getFullName`
+  * `FullName`의 경우 `User` 에서 꼭 필요한 항목은 아니지만, 특정 화면/API에서는 필요한 항목이기 때문에 이처럼 별도의 Getter를 통해 생성합니다. 
+
 **libs/entity/src/user/UserModule**
 
 ```typescript
@@ -118,7 +126,8 @@ export class UserName {
 export class UserModule {}
 ```
 
-
+여기서는 DataMapper 패턴을 사용하는데요.  
+  
 이미 다들 아시겠지만, TypeORM에서는 2가지 패턴을 지원합니다.
 
 * Active Record 패턴
@@ -173,7 +182,8 @@ ticket.cancel();
 
 > 다음편에서 `sqlite`를 통해 별도의 도커 실행 없이 단위 테스트를 진행하겠습니다.
 
-그리고 로컬에서 실행한 도커 PostgreSQL에 접근하기 위해 Config 파일을 하나 만들어두겠습니다.
+그리고 로컬에서 실행한 도커 PostgreSQL에 접근하기 위해 Config 파일을 하나 만들어두겠습니다.  
+(테스트와 실제 로컬에서 실행하는 것의 환경을 분리합니다.)
 
 ![pg-config](./images/pg-config.png)
 
@@ -202,33 +212,62 @@ export function getPgTestTypeOrmModule() {
 **libs/entity/test/unit/user/UserRepository.pg.spec.ts**
 
 ```typescript
-describe('UserRepository PG', () => {
+describe('UserQueryRepository', () => {
   let userRepository: Repository<User>;
+  let userQueryRepository: UserQueryRepository;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [UserModule, getPgTestTypeOrmModule()],
     }).compile();
 
+    userQueryRepository = module.get<UserQueryRepository>(UserQueryRepository);
     userRepository = module.get('UserRepository');
   });
 
-  beforeEach(async () => {
+  afterEach(async () => {
     await userRepository.clear();
   });
 
-  it('Docker PostgreSQL save', async () => {
+  it('save', async () => {
+    // given
     const firstName = 'Lee';
     const lastName = 'Donguk';
     const user = new User();
     user.firstName = firstName;
     user.lastName = lastName;
+
+    // when
     const savedUser = await userRepository.save(user);
 
-    console.log(`result=${JSON.stringify(savedUser)}`);
+    // then
     expect(savedUser.id).toBeGreaterThanOrEqual(1);
+  });
+
+  it('findUserName', async () => {
+    // given
+    const firstName = 'Lee';
+    const lastName = 'Donguk';
+    const user = new User();
+    user.firstName = firstName;
+    user.lastName = lastName;
+    await userRepository.save(user);
+
+    // when
+    const result = await userQueryRepository.findUserName(savedUser.id);
+
+    // then
+    expect(result.getFullName()).toBe(`${firstName} ${lastName}`);
   });
 });
 ```
 
+간단한 `save` 와 `findUserName` 모두 테스트가 통과 되는 것을 확인합니다.
+
 ![test-result1](./images/test-result1.png)
+
+## 4. 마무리
+
+이번 시간에는 실제 도커를 통해 PostgreSQL을 실행후 TypeORM 기능을 검증해보았습니다.  
+다음 편에서는 매번 이렇게 도커를 실행해야지 테스트를 돌리는게 아니라,  
+간단한 인메모리 DB를 사용해서 별도의 도커 실행 없이 테스트를 수행하는 방법을 진행해보겠습니다.
