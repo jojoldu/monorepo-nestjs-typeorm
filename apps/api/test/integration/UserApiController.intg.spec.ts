@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { ApiAppModule } from '../../src/ApiAppModule';
+import { getConnection } from 'typeorm';
 
 describe('UserApiController (e2e)', () => {
   let app: INestApplication;
@@ -13,6 +14,10 @@ describe('UserApiController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+  });
+
+  afterEach(async () => {
+    await getConnection().close();
   });
 
   it('/ (GET)', () => {

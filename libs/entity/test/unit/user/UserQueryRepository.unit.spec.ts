@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserQueryRepository } from '@app/entity/user/UserQueryRepository';
 import { User } from '@app/entity/user/User.entity';
-import { Repository } from 'typeorm';
+import { getConnection, Repository } from 'typeorm';
 import { UserModule } from '@app/entity/user/UserModule';
 import { getSqliteTestTypeOrmModule } from '../../../getSqliteTestTypeOrmModule';
 
@@ -20,6 +20,7 @@ describe('UserQueryRepository', () => {
 
   beforeEach(async () => {
     await userRepository.clear();
+    await getConnection().close();
   });
 
   it('save', async () => {

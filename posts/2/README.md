@@ -227,6 +227,7 @@ describe('UserQueryRepository', () => {
 
   afterEach(async () => {
     await userRepository.clear();
+    await getConnection().close();
   });
 
   it('save', async () => {
