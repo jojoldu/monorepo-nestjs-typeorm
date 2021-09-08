@@ -1,7 +1,7 @@
 import { createQueryBuilder, EntityRepository, Repository } from 'typeorm';
 import { User } from './User.entity';
 import { plainToClass } from 'class-transformer';
-import { UserName } from '@app/entity/user/UserName';
+import { UserName } from '@app/entity/domain/user/UserName';
 
 @EntityRepository(User)
 export class UserQueryRepository extends Repository<User> {

@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { User } from '@app/entity/user/User.entity';
-import {getConnection, Repository} from 'typeorm';
-import { UserModule } from '@app/entity/user/UserModule';
+import { User } from '@app/entity/domain/user/User.entity';
+import { getConnection, Repository } from 'typeorm';
+import { UserModule } from '@app/entity/domain/user/UserModule';
 import { getPgTestTypeOrmModule } from '../../../getPgTestTypeOrmModule';
-import { UserQueryRepository } from '@app/entity/user/UserQueryRepository';
+import { UserQueryRepository } from '@app/entity/domain/user/UserQueryRepository';
 
 describe('UserQueryRepository', () => {
   let userRepository: Repository<User>;

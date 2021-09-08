@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
-import { User } from '@app/entity/user/User.entity';
+import { User } from '@app/entity/domain/user/User.entity';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserModule } from '@app/entity/user/UserModule';
+import { UserModule } from '@app/entity/domain/user/UserModule';
 import { getSqliteTestTypeOrmModule } from '../../../../../libs/entity/getSqliteTestTypeOrmModule';
 import { UserApiService } from '../../../src/user/UserApiService';
 

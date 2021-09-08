@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { UserApiService } from './UserApiService';
-import { User } from '@app/entity/user/User.entity';
+import { User } from '@app/entity/domain/user/User.entity';
 
 @Controller()
 export class UserApiController {

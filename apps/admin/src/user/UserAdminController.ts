@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { UserAdminService } from './UserAdminService';
-import { User } from '@app/entity/user/User.entity';
+import { User } from '@app/entity/domain/user/User.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 

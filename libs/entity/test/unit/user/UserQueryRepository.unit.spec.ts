@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserQueryRepository } from '@app/entity/user/UserQueryRepository';
-import { User } from '@app/entity/user/User.entity';
+import { UserQueryRepository } from '@app/entity/domain/user/UserQueryRepository';
+import { User } from '@app/entity/domain/user/User.entity';
 import { getConnection, Repository } from 'typeorm';
-import { UserModule } from '@app/entity/user/UserModule';
+import { UserModule } from '@app/entity/domain/user/UserModule';
 import { getSqliteTestTypeOrmModule } from '../../../getSqliteTestTypeOrmModule';
 
 describe('UserQueryRepository', () => {
