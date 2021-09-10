@@ -1,3 +1,7 @@
-import { ConsoleLoggerOptions, LoggerService } from '@nestjs/common';
+import { ConsoleLogger } from '@nestjs/common';
 
-export class PlainTextLogger implements LoggerService {}
+export class PlainTextLogger extends ConsoleLogger {
+  constructor() {
+    super();
+  }
+}

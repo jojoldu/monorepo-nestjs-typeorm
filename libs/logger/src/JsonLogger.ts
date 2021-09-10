@@ -1,5 +1,5 @@
-import { format, transports, createLogger, Logger } from 'winston';
-import { ConsoleLogger, ConsoleLoggerOptions } from '@nestjs/common';
+import { createLogger, format, Logger, transports } from 'winston';
+import { ConsoleLogger } from '@nestjs/common';
 
 interface TransformableInfo {
   level: string;
@@ -9,8 +9,8 @@ interface TransformableInfo {
 
 export class JsonLogger extends ConsoleLogger {
   private logger: Logger;
-  constructor(context: string, options: ConsoleLoggerOptions) {
-    super(context, options);
+  constructor() {
+    super();
     this.logger = createLogger({
       transports: [
         new transports.Console({
