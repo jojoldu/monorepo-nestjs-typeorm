@@ -2,14 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '@app/entity/domain/user/User.entity';
 import { Repository } from 'typeorm';
 import { UserModule } from '@app/entity/domain/user/UserModule';
-import { getSqliteTestTypeOrmModule } from '../../../getSqliteTestTypeOrmModule';
+import { getPgTestTypeOrmModule } from '../../../getPgTestTypeOrmModule';
 
 describe('UserCoreRepository', () => {
   let userRepository: Repository<User>;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [UserModule, getSqliteTestTypeOrmModule()],
+      imports: [UserModule, getPgTestTypeOrmModule()],
     }).compile();
 
     userRepository = module.get('UserRepository');

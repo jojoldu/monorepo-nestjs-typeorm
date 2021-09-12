@@ -2,8 +2,8 @@ import { Repository } from 'typeorm';
 import { User } from '@app/entity/domain/user/User.entity';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserModule } from '@app/entity/domain/user/UserModule';
-import { getSqliteTestTypeOrmModule } from '../../../../../libs/entity/getSqliteTestTypeOrmModule';
 import { UserApiService } from '../../../src/user/UserApiService';
+import { getPgTestTypeOrmModule } from 'libs/entity/getPgTestTypeOrmModule';
 
 describe('UserApiService', () => {
   let userRepository: Repository<User>;
@@ -11,7 +11,7 @@ describe('UserApiService', () => {
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [UserModule, getSqliteTestTypeOrmModule()],
+      imports: [UserModule, getPgTestTypeOrmModule()],
       providers: [UserApiService],
     }).compile();
 

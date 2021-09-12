@@ -1,23 +1,14 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import { User } from '@app/entity/domain/user/User.entity';
 import { UserApiModule } from './user/UserApiModule';
+import { getPgTestTypeOrmModule } from '@app/entity/config/getPgRealTypeOrmModule';
+import { WinstonModule } from 'nest-winston';
+import { getWinstonLogger } from '@app/common-config/getWinstonLogger';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'test',
-      password: 'test',
-      database: 'test',
-      entities: [User],
-      synchronize: true,
-      namingStrategy: new SnakeNamingStrategy(),
-    }),
+    getPgTestTypeOrmModule(),
     UserApiModule,
+    WinstonModule.forRoot(getWinstonLogger(process.env.NODE_ENV, 'api')),
   ],
 })
 export class ApiAppModule {}

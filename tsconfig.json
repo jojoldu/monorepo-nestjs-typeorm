@@ -18,6 +18,18 @@
       ],
       "@app/entity/*": [
         "libs/entity/src/*"
+      ],
+      "@app/utils": [
+        "libs/utils/src"
+      ],
+      "@app/utils/*": [
+        "libs/utils/src/*"
+      ],
+      "@app/common-config": [
+        "libs/common-config/src"
+      ],
+      "@app/common-config/*": [
+        "libs/common-config/src/*"
       ]
     }
   }
