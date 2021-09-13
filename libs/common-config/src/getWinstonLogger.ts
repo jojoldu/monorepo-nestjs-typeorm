@@ -2,8 +2,10 @@ import { format, transports } from 'winston';
 import { utilities as nestWinstonModuleUtilities } from 'nest-winston';
 
 export function getWinstonLogger(nodeEnv, moduleName) {
-  const isLocalEnv = ['local', 'test'].includes(nodeEnv);
+  const isLocalEnv = ['local', 'test', undefined].includes(nodeEnv);
   const level = isLocalEnv ? 'debug' : 'info';
+
+  console.log(`nodeEnv=${nodeEnv}, level=${level}`);
 
   return {
     transports: [
