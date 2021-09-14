@@ -1,7 +1,10 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import * as path from 'path';
 
-export function getPgTestTypeOrmModule() {
+export function getPgRealTypeOrmModule() {
+  const entityPath = path.join(__dirname, '../src/domain/**/*.entity.ts');
+  console.log(`entityPath=${entityPath}`);
   return TypeOrmModule.forRoot({
     type: 'postgres',
     host: 'localhost',
@@ -9,8 +12,8 @@ export function getPgTestTypeOrmModule() {
     username: 'test',
     password: 'test',
     database: 'test',
-    entities: [__dirname + '/../**/*.entity.ts'],
-    synchronize: false,
+    entities: [entityPath],
+    synchronize: true,
     namingStrategy: new SnakeNamingStrategy(),
   });
 }

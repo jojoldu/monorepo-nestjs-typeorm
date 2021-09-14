@@ -3,7 +3,7 @@ import { User } from '@app/entity/domain/user/User.entity';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserModule } from '@app/entity/domain/user/UserModule';
 import { UserApiService } from '../../../src/user/UserApiService';
-import { getPgTestTypeOrmModule } from 'libs/entity/getPgTestTypeOrmModule';
+import { getPgTestTypeOrmModule } from 'libs/entity/test/getPgTestTypeOrmModule';
 
 describe('UserApiService', () => {
   let userRepository: Repository<User>;

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '@app/entity/domain/user/User.entity';
 import { Repository } from 'typeorm';
 import { UserModule } from '@app/entity/domain/user/UserModule';
-import { getPgTestTypeOrmModule } from '../../../getPgTestTypeOrmModule';
+import { getPgTestTypeOrmModule } from '../../getPgTestTypeOrmModule';
 
 describe('UserCoreRepository', () => {
   let userRepository: Repository<User>;

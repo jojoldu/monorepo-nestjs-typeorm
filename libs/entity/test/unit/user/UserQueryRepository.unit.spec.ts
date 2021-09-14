@@ -3,7 +3,7 @@ import { UserQueryRepository } from '@app/entity/domain/user/UserQueryRepository
 import { User } from '@app/entity/domain/user/User.entity';
 import { getConnection, Repository } from 'typeorm';
 import { UserModule } from '@app/entity/domain/user/UserModule';
-import { getPgTestTypeOrmModule } from '../../../getPgTestTypeOrmModule';
+import { getPgTestTypeOrmModule } from '../../getPgTestTypeOrmModule';
 
 describe('UserQueryRepository', () => {
   let userQueryRepository: UserQueryRepository;
