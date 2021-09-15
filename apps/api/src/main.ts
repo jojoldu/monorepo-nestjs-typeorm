@@ -1,15 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { ApiAppModule } from './ApiAppModule';
-import { WinstonModule } from 'nest-winston';
-import { getWinstonLogger } from '@app/common-config/getWinstonLogger';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(ApiAppModule, {
-    logger: WinstonModule.createLogger(
-      getWinstonLogger(process.env.NODE_ENV, 'api'),
-    ),
-  });
+  const app = await NestFactory.create(ApiAppModule);
 
   const config = new DocumentBuilder()
     .setTitle('Api Document')
@@ -18,7 +12,7 @@ async function bootstrap() {
     .addTag('api')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('api-docs', app, document);
 
   await app.listen(3000);
 }

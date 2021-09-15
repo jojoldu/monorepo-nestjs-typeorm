@@ -38,7 +38,6 @@ function getJsonFormat(moduleName) {
       format: 'YYYY-MM-DD HH:mm:ss',
     }),
     format.ms(),
-    format.colorize(),
     format.json(),
   );
 }
