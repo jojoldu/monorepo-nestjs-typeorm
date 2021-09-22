@@ -145,12 +145,15 @@ export class LocalDateTransformer implements ValueTransformer {
 
 ### 1-2. Entity 적용
 
+간단하게 테스트용 Entity를 만들어 봅니다.
+
 ```typescript
 @Entity()
 export class TestEntity extends BaseTimeEntity {
     @Column()
     name: string;
 
+  // 1) LocalDateTransformer 적용
     @Column({
         type: 'timestamptz',
         transformer: new LocalDateTransformer(),
@@ -158,6 +161,7 @@ export class TestEntity extends BaseTimeEntity {
     })
     orderDate: LocalDate;
 
+  // 2) LocalDateTimeTransformer 적용
     @Column({
         type: 'timestamptz',
         transformer: new LocalDateTimeTransformer(),
@@ -183,7 +187,142 @@ export class TestEntity extends BaseTimeEntity {
 }
 ```
 
-## CreateDateColumn, UpdateDateColumn
+Entity에서 ValueTransformer를 적용하는것은 크게 어렵지 않습니다.
+
+* `transformer: new LocalDateTransformer()`
+* `transformer: new LocalDateTimeTransformer()`
+
+
+## 2. 테스트 
+
+이제 해당 기능이 정상적으로 작동하는지 검증해보겠습니다.  
+  
+### 조회 컬럼 검증
+
+```typescript
+  it('LocalDate로 필드가 생성된다', async () => {
+    // given
+    const now = LocalDate.now(); // yyyy-MM-dd
+    const nowTime = LocalDateTime.now(); // yyyy-MM-dd HH:mm:ss
+
+    // when
+    await testEntityRepository.save(TestEntity.of('name', now, nowTime));
+    const result = await testEntityRepository.find();
+    const testEntity = result[0];
+
+    // then
+    expect(testEntity.id).toBeGreaterThanOrEqual(1);
+    expect(testEntity.name).toBe('name');
+    expect(testEntity.orderDate.isEqual(now)).toBeTruthy();
+    expect(testEntity.orderDateTime.isEqual(nowTime)).toBeTruthy();
+  });
+```
+
+### 조회 조건 컬럼 검증
+
+```typescript
+  it('LocalDate를 조회 조건으로 사용할 수 있다', async () => {
+    // given
+    const now = LocalDate.now(); // yyyy-MM-dd
+    const nowTime = LocalDateTime.now(); // yyyy-MM-dd HH:mm:ss
+
+    // when
+    await testEntityRepository.save(TestEntity.of('name', now, nowTime));
+    const testEntity = await testEntityRepository
+      .createQueryBuilder('testEntity')
+      .where('testEntity.orderDateTime <= :nowTime', { nowTime: nowTime })
+      .getOne();
+
+    // then
+    expect(testEntity.id).toBeGreaterThanOrEqual(1);
+    expect(testEntity.name).toBe('name');
+    expect(testEntity.getCreatedAt().isAfter(nowTime)).toBeTruthy();
+    expect(testEntity.orderDate.isEqual(now)).toBeTruthy();
+    expect(testEntity.orderDateTime.isEqual(nowTime)).toBeTruthy();
+  });
+```
+
+### 전체 테스트 코드
+
+```typescript
+describe('TestEntityRepository', () => {
+  let testEntityRepository: Repository<TestEntity>;
+
+  beforeAll(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [TestEntityModule, getPgTestTypeOrmModule()],
+    }).compile();
+
+    testEntityRepository = module.get('TestEntityRepository');
+  });
+
+  afterAll(async () => {
+    await getConnection().close();
+  });
+
+  beforeEach(async () => {
+    await testEntityRepository.clear();
+  });
+
+  it('LocalDate로 필드가 생성된다', async () => {
+    // given
+    const now = LocalDate.now(); // yyyy-MM-dd
+    const nowTime = LocalDateTime.now(); // yyyy-MM-dd HH:mm:ss
+
+    // when
+    await testEntityRepository.save(TestEntity.of('name', now, nowTime));
+    const result = await testEntityRepository.find();
+    const testEntity = result[0];
+
+    // then
+    expect(testEntity.id).toBeGreaterThanOrEqual(1);
+    expect(testEntity.name).toBe('name');
+    expect(testEntity.getCreatedAt().isAfter(nowTime)).toBeTruthy();
+    expect(testEntity.orderDate.isEqual(now)).toBeTruthy();
+    expect(testEntity.orderDateTime.isEqual(nowTime)).toBeTruthy();
+  });
+
+  it('LocalDate를 조회 조건으로 사용할 수 있다', async () => {
+    // given
+    const now = LocalDate.now(); // yyyy-MM-dd
+    const nowTime = LocalDateTime.now(); // yyyy-MM-dd HH:mm:ss
+
+    // when
+    await testEntityRepository.save(TestEntity.of('name', now, nowTime));
+    const testEntity = await testEntityRepository
+      .createQueryBuilder('testEntity')
+      .where('testEntity.orderDateTime <= :nowTime', { nowTime: nowTime })
+      .getOne();
+
+    // then
+    expect(testEntity.id).toBeGreaterThanOrEqual(1);
+    expect(testEntity.name).toBe('name');
+    expect(testEntity.getCreatedAt().isAfter(nowTime)).toBeTruthy();
+    expect(testEntity.orderDate.isEqual(now)).toBeTruthy();
+    expect(testEntity.orderDateTime.isEqual(nowTime)).toBeTruthy();
+  });
+});
+```
+
+둘 모두 테스트를 수행해보면 아래와 같이 정상적으로 수행되는 것을 볼 수 있습니다.
+
+![test1](./images/test1.png)
+
+특히 두번째 테스트의 경우 **파라미터에서도 정상적으로 날짜 변환값이 사용된 것을 확인**할 수 있습니다. 
+
+![test2](./images/test2.png)
+
+## 3. CreateDateColumn, UpdateDateColumn
+
+TypeORM을 사용할때 거의 필수적으로 사용되는 날짜 대상이 바로 `@CreateDateColumn()`, `@UpdateDateColumn()` 데코레이터들인데요.  
+  
+아쉽게도, 현재 (**2021.09**) PostgreSQL 에서는 이 데코레이터들과 함께 Value Transformer를 사용할 수는 없습니다.
+
+* [UpdateDateColumn fails with transformer](https://github.com/typeorm/typeorm/issues/7150)
+
+현상은, ValueTransformer가 있을 경우 create 시간과 update 시간등이 transformer로 전달되지 않는 것인데요.  
+  
+그래서 이 부분에 한해서는 별도의 `getter` 메소드를 생성해서 처리합니다.
 
 ```typescript
 import {
@@ -223,44 +362,22 @@ export abstract class BaseTimeEntity {
 }
 ```
 
-* [CreateDateColumn with ValueTransformer](https://github.com/typeorm/typeorm/issues/7407)
 
+* `setter` 가 필요하진 않습니다.
+  * 이 데코레이터들의 값은 DB에 등록/수정/삭제가 일어날 경우에만 추가/변경이 일어나기 때문입니다.
+* 조회조건에서 사용하기 위해서는 어쩔수 없이 별도의 유틸리티 함수를 통해서 연산을 해야만 합니다.
+
+테스트 코드로 검증하면 `getter` 메소드 자체는 잘 작동합니다.
 
 ```typescript
-describe('TestEntityRepository', () => {
-    let testEntityRepository: Repository<TestEntity>;
-
-    beforeAll(async () => {
-        const module: TestingModule = await Test.createTestingModule({
-            imports: [TestEntityModule, getPgTestTypeOrmModule()],
-        }).compile();
-
-        testEntityRepository = module.get('TestEntityRepository');
-        await testEntityRepository.clear();
-    });
-
-    afterEach(async () => {
-        await getConnection().close();
-    });
-
-    it('LocalDate로 필드가 생성된다', async () => {
-        // given
-        const now = LocalDate.now(); // yyyy-MM-dd
-        const nowTime = LocalDateTime.now(); // yyyy-MM-dd HH:mm:ss
-
-        // when
-        await testEntityRepository.save(TestEntity.of('name', now, nowTime));
-        const result = await testEntityRepository.find();
-        const testEntity = result[0];
-
-        // then
-        expect(testEntity.id).toBeGreaterThanOrEqual(1);
-        expect(testEntity.name).toBe('name');
-        expect(testEntity.getCreatedAt().isAfter(nowTime)).toBeTruthy();
-        expect(testEntity.orderDate.isEqual(now)).toBeTruthy();
-        expect(testEntity.orderDateTime.isEqual(nowTime)).toBeTruthy();
-    });
-});
+  it('LocalDate로 필드가 생성된다', async () => {
+      ...
+      // getCreatedAt() 도 검증한다.
+      expect(testEntity.getCreatedAt().isAfter(nowTime)).toBeTruthy();
+      expect(testEntity.orderDate.isEqual(now)).toBeTruthy();
+      expect(testEntity.orderDateTime.isEqual(nowTime)).toBeTruthy();
+  });
 ```
 
+다만, 조회조건으로는 바로 사용하지 못한다는 단점이 있어서, 이 점 때문에라도 이슈가 최대한 빨리 해결되길 기다리고 있습니다.
 
