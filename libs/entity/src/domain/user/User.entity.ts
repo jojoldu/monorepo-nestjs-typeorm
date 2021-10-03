@@ -1,8 +1,15 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { BaseTimeEntity } from '@app/entity/domain/BaseTimeEntity';
 import { LocalDateTransformer } from '@app/entity/transformer/LocalDateTransformer';
 import { LocalDate, LocalDateTime } from 'js-joda';
 import { LocalDateTimeTransformer } from '@app/entity/transformer/LocalDateTimeTransformer';
+import { Group } from '@app/entity/domain/group/Group.entity';
 
 @Entity()
 export class User extends BaseTimeEntity {
@@ -31,6 +38,12 @@ export class User extends BaseTimeEntity {
     nullable: true,
   })
   orderDateTime: LocalDateTime;
+
+  @ManyToOne(() => Group, {
+    createForeignKeyConstraints: false,
+  })
+  @JoinColumn({ name: 'group_id', referencedColumnName: 'id' })
+  group: Group;
 
   static byName(firstName: string, lastName: string) {
     const user = new User();

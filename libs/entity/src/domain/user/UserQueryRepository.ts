@@ -12,6 +12,7 @@ export class UserQueryRepository extends Repository<User> {
       .where(`user.id =:id`, { id: userId });
 
     const row = await queryBuilder.getOne();
-    return plainToClass(UserName, row);
+    const result = plainToClass(UserName, row);
+    return result;
   }
 }

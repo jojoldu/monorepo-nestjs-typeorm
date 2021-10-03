@@ -20,6 +20,9 @@ describe('UserQueryRepository', () => {
 
   afterEach(async () => {
     await userRepository.clear();
+  });
+
+  afterAll(async () => {
     await getConnection().close();
   });
 

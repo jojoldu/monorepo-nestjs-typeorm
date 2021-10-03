@@ -7,7 +7,7 @@ import { getConnection } from 'typeorm';
 describe('UserApiController (e2e)', () => {
   let app: INestApplication;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [ApiAppModule],
     }).compile();
@@ -16,7 +16,7 @@ describe('UserApiController (e2e)', () => {
     await app.init();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await getConnection().close();
   });
 

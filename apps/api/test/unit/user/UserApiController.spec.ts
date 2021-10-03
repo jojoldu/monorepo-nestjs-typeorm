@@ -8,7 +8,10 @@ describe('UserApiController', () => {
 
   describe('root', () => {
     it('should return "Hello World!"', () => {
-      userApiController = new UserApiController(new UserApiService(null, null));
+      userApiController = new UserApiController(
+        new UserApiService(null, null),
+        null,
+      );
       expect(userApiController.getHello()).toBe('Hello World!');
     });
 
@@ -27,7 +30,7 @@ describe('UserApiController', () => {
         }
       })();
 
-      userApiController = new UserApiController(stubUserApiService);
+      userApiController = new UserApiController(stubUserApiService, null);
 
       const users = await userApiController.getUsers();
       expect(users).toHaveLength(id);
@@ -42,7 +45,10 @@ describe('UserApiController', () => {
       const stubUserApiService: UserApiService = mock(UserApiService);
       when(stubUserApiService.findAll()).thenResolve([user]);
 
-      userApiController = new UserApiController(instance(stubUserApiService));
+      userApiController = new UserApiController(
+        instance(stubUserApiService),
+        null,
+      );
 
       const users = await userApiController.getUsers();
       expect(users).toHaveLength(id);
