@@ -2,6 +2,7 @@ import { UserApiController } from '../../../src/user/UserApiController';
 import { UserApiService } from '../../../src/user/UserApiService';
 import { User } from '@app/entity/domain/user/User.entity';
 import { instance, mock, when } from 'ts-mockito';
+import { getTestLogger } from '../../../../../libs/common-config/test/getTestLogger';
 
 describe('UserApiController', () => {
   let userApiController: UserApiController;
@@ -10,9 +11,9 @@ describe('UserApiController', () => {
     it('should return "Hello World!"', () => {
       userApiController = new UserApiController(
         new UserApiService(null, null),
-        null,
+        getTestLogger(),
       );
-      expect(userApiController.getHello()).toBe('Hello World!');
+      expect(userApiController.getHello().data).toBe('Hello World!');
     });
 
     it('getUsers', async () => {
@@ -30,7 +31,10 @@ describe('UserApiController', () => {
         }
       })();
 
-      userApiController = new UserApiController(stubUserApiService, null);
+      userApiController = new UserApiController(
+        stubUserApiService,
+        getTestLogger(),
+      );
 
       const users = await userApiController.getUsers();
       expect(users).toHaveLength(id);
@@ -47,7 +51,7 @@ describe('UserApiController', () => {
 
       userApiController = new UserApiController(
         instance(stubUserApiService),
-        null,
+        getTestLogger(),
       );
 
       const users = await userApiController.getUsers();
