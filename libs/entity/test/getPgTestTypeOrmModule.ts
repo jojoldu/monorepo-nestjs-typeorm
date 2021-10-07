@@ -3,8 +3,10 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import * as path from 'path';
 
 export function getPgTestTypeOrmModule() {
-  const entityPath = path.join(__dirname, '../src/domain/**/*.entity.ts');
-  console.log(`entityPath=${entityPath}`);
+  const logging = process.env.LOGGING;
+  console.log(`logging=${logging}`);
+  console.log(`env=${JSON.stringify(process.env)}`);
+
   return TypeOrmModule.forRoot({
     type: 'postgres',
     host: 'localhost',
@@ -12,8 +14,9 @@ export function getPgTestTypeOrmModule() {
     username: 'test',
     password: 'test',
     database: 'test',
-    entities: [entityPath],
+    entities: [path.join(__dirname, '../src/domain/**/*.entity.ts')],
     synchronize: true,
+    logging: logging === undefined ? true : Boolean(logging),
     namingStrategy: new SnakeNamingStrategy(),
   });
 }

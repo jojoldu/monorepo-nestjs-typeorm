@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -12,6 +13,7 @@ import { LocalDateTimeTransformer } from '@app/entity/transformer/LocalDateTimeT
 import { Group } from '@app/entity/domain/group/Group.entity';
 
 @Entity()
+@Index('idx_user_1', ['group'])
 export class User extends BaseTimeEntity {
   @PrimaryGeneratedColumn()
   id: number;
