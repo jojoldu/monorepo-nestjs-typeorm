@@ -1,25 +1,30 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '@app/entity/domain/user/User.entity';
-import { getConnection, Repository } from 'typeorm';
+import { createQueryBuilder, getConnection, Repository } from 'typeorm';
 import { UserModule } from '@app/entity/domain/user/UserModule';
 import { getPgTestTypeOrmModule } from '../../getPgTestTypeOrmModule';
 import { UserQueryRepository } from '@app/entity/domain/user/UserQueryRepository';
+import { GroupModule } from '@app/entity/domain/group/GroupModule';
+import { Group } from '@app/entity/domain/group/Group.entity';
 
 describe('UserQueryRepository', () => {
+  let groupRepository: Repository<Group>;
   let userRepository: Repository<User>;
   let userQueryRepository: UserQueryRepository;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [UserModule, getPgTestTypeOrmModule()],
+      imports: [UserModule, GroupModule, getPgTestTypeOrmModule()],
     }).compile();
 
     userQueryRepository = module.get<UserQueryRepository>(UserQueryRepository);
     userRepository = module.get('UserRepository');
+    groupRepository = module.get('GroupRepository');
   });
 
   afterEach(async () => {
     await userRepository.clear();
+    await groupRepository.clear();
   });
 
   afterAll(async () => {
@@ -55,5 +60,48 @@ describe('UserQueryRepository', () => {
 
     // then
     expect(result.getFullName()).toBe(`${firstName} ${lastName}`);
+  });
+
+  it('user와 group 연관관계를 검증한다', async () => {
+    //given
+    const groupName = 'testGroup';
+    const group = await groupRepository.save(Group.of(groupName, 'desc'));
+    const firstName = 'donguk';
+    const user = User.byName(firstName, 'lee');
+    user.updateGroup(group);
+
+    await userRepository.save(user);
+
+    //when
+    const savedUser = await userRepository.findOne({ firstName });
+    const savedGroup = await savedUser.group;
+
+    //then
+    expect(savedUser.firstName).toBe(firstName);
+    expect(savedGroup.name).toBe(groupName);
+  });
+
+  it('user와 group fetch join', async () => {
+    //given
+    const groupName = 'testGroup';
+    const group = await groupRepository.save(Group.of(groupName, 'desc'));
+    const firstName = 'donguk';
+    const user = User.byName(firstName, 'lee');
+    user.updateGroup(group);
+
+    await userRepository.save(user);
+
+    //when
+    const savedUser = await createQueryBuilder<User>('user', 'u')
+      .innerJoinAndSelect('u.group', 'group')
+      .where('u.firstName = :firstName', { firstName })
+      .getOne();
+
+    // //when
+    // const savedUser = await userRepository.findOne({ firstName });
+
+    //then
+    expect(savedUser.firstName).toBe(firstName);
+    expect(savedUser.group.name).toBe(groupName);
   });
 });

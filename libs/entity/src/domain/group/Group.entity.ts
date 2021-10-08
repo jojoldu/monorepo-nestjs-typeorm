@@ -11,4 +11,15 @@ export class Group extends BaseTimeEntity {
 
   @Column()
   description: string;
+
+  constructor() {
+    super();
+  }
+
+  static of(name: string, description: string) {
+    const group = new Group();
+    group.name = name;
+    group.description = description;
+    return group;
+  }
 }

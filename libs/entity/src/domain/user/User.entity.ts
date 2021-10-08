@@ -43,6 +43,8 @@ export class User extends BaseTimeEntity {
 
   @ManyToOne(() => Group, {
     createForeignKeyConstraints: false,
+    lazy: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'group_id', referencedColumnName: 'id' })
   group: Group;
@@ -52,5 +54,9 @@ export class User extends BaseTimeEntity {
     user.firstName = firstName;
     user.lastName = lastName;
     return user;
+  }
+
+  updateGroup(group: Group): void {
+    this.group = group;
   }
 }
