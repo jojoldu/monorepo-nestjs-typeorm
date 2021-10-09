@@ -22,4 +22,8 @@ export class Group extends BaseTimeEntity {
     group.description = description;
     return group;
   }
+
+  getFullDescription(): string {
+    return `${this.name} ${this.description}`;
+  }
 }

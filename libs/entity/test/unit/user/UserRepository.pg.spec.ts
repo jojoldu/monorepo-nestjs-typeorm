@@ -66,7 +66,7 @@ describe('UserQueryRepository', () => {
     //given
     const groupName = 'testGroup';
     const group = await groupRepository.save(Group.of(groupName, 'desc'));
-    const firstName = 'donguk';
+    const firstName = 'Donguk';
     const user = User.byName(firstName, 'lee');
     user.updateGroup(group);
 
@@ -81,7 +81,7 @@ describe('UserQueryRepository', () => {
     expect(savedGroup.name).toBe(groupName);
   });
 
-  it('user와 group fetch join', async () => {
+  it('user와 group join', async () => {
     //given
     const groupName = 'testGroup';
     const group = await groupRepository.save(Group.of(groupName, 'desc'));
@@ -92,13 +92,30 @@ describe('UserQueryRepository', () => {
     await userRepository.save(user);
 
     //when
-    const savedUser = await createQueryBuilder<User>('user', 'u')
-      .innerJoinAndSelect('u.group', 'group')
-      .where('u.firstName = :firstName', { firstName })
+    const savedUser = await createQueryBuilder(User, 'user')
+      .select(['user.id', 'user.firstName', 'group.name'])
+      .innerJoin('user.group', 'group')
+      .where('user.firstName = :firstName', { firstName })
       .getOne();
 
-    // //when
-    // const savedUser = await userRepository.findOne({ firstName });
+    //then
+    expect(savedUser.firstName).toBe(firstName);
+    expect(savedUser.group.name).toBe(groupName);
+  });
+
+  it('user와 group lazy load', async () => {
+    //given
+    const groupName = 'testGroup';
+    const group = await groupRepository.save(Group.of(groupName, 'desc'));
+    const firstName = 'donguk';
+    const user = User.byName(firstName, 'lee');
+    user.updateGroup(group);
+
+    await userRepository.save(user);
+
+    //when
+    const savedUser = await userRepository.findOne({ firstName });
+    await savedUser.group;
 
     //then
     expect(savedUser.firstName).toBe(firstName);
