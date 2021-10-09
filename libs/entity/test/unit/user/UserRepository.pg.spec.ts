@@ -81,7 +81,7 @@ describe('UserQueryRepository', () => {
     expect(savedGroup.name).toBe(groupName);
   });
 
-  it('user와 group join', async () => {
+  it('User and Group Join Query', async () => {
     //given
     const groupName = 'testGroup';
     const group = await groupRepository.save(Group.of(groupName, 'desc'));
@@ -93,10 +93,11 @@ describe('UserQueryRepository', () => {
 
     //when
     const savedUser = await createQueryBuilder(User, 'user')
-      .select(['user.id', 'user.firstName', 'group.name'])
-      .innerJoin('user.group', 'group')
+      .innerJoinAndSelect('user.group', 'group')
       .where('user.firstName = :firstName', { firstName })
       .getOne();
+
+    console.log(JSON.stringify(savedUser));
 
     //then
     expect(savedUser.firstName).toBe(firstName);
@@ -115,10 +116,12 @@ describe('UserQueryRepository', () => {
 
     //when
     const savedUser = await userRepository.findOne({ firstName });
-    await savedUser.group;
+    const savedGroup = await savedUser.group;
+
+    console.log(`savedGroup = ${JSON.stringify(savedGroup)}`);
 
     //then
     expect(savedUser.firstName).toBe(firstName);
-    expect(savedUser.group.name).toBe(groupName);
+    expect(savedGroup.name).toBe(groupName);
   });
 });

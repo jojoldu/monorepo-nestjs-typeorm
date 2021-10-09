@@ -60,6 +60,63 @@ export class User extends BaseTimeEntity {
 
 (2) `@ManyToOne ~ @JoinColumn`
 
-* 위에서 언급한대로 `createForeignKeyConstraints: false,` 를 통해 FK 제약조건은 제거합니다.
+* 위에서 언급한대로 `createForeignKeyConstraints: false,` 를 통해 FK 제약조건을 제거합니다.
 * 저같은 경우엔 `@OneToOne` 외에도 `@ManyToOne` 에서도 꼭 `@JoinColumn`을 선언해줍니다.
 * 실제 생성될 테이블의 모습이 어느정도 예측 가능 범위 내에 있어야하고, 이후 인덱스 튜닝등이 필요해 복합 컬럼 인덱스를 만들어야할때가 있어 이때 어느 컬럼을 잡아야할지 알 수 있습니다.
+
+실제로 잘 작동하는지 테스트 코드로 검증해보겠습니다.
+
+## 테스트코드
+
+FK 제약 조건이 없어도 연관관계가 잘 작동하는지 검증 하기 위해 아래와 같이 `lazy:true` 를 추가해 연관관계 기능을 검증해봅니다.
+
+```typescript
+@Entity()
+@Index('idx_user_1', ['group'])
+export class User extends BaseTimeEntity {
+  ...
+
+  @ManyToOne(() => Group, {
+    createForeignKeyConstraints: false,
+    lazy: true, // 연관관계 테스트를 위한 lazy 설정
+  })
+  @JoinColumn({ name: 'group_id', referencedColumnName: 'id' })
+  group: Group;
+
+  ...
+}
+```
+
+테스트 코드는 다음과 같습니다.
+
+```typescript
+it('user와 group lazy load', async () => {
+  //given
+  const groupName = 'testGroup';
+  const group = await groupRepository.save(Group.of(groupName, 'desc'));
+  const firstName = 'donguk';
+  const user = User.byName(firstName, 'lee');
+  user.updateGroup(group);
+
+  await userRepository.save(user);
+
+  //when
+  const savedUser = await userRepository.findOne({ firstName });
+  const savedGroup = await savedUser.group;
+
+  console.log(`savedGroup = ${JSON.stringify(savedGroup)}`);
+
+  //then
+  expect(savedUser.firstName).toBe(firstName);
+  expect(savedGroup.name).toBe(groupName);
+});
+```
+
+* `console.log` 로 하는 테스트는 좋은 테스트는 아닙니다.
+* 다만, 실제로 잘 조회되는지 포스팅에서 보여주기 위함이며, 실제로는 `//when` 에서 하듯이  `expect` 로 셀프 검증 (`SelfTestingCode`) 이 되어야합니다.
+
+이렇게 테스트 코드를 작성후 검증을 해보면?
+
+![result](./images/result.png)
+
+Lazy Loading 에서도 FK 제약 조건 없이 잘 작동하는 것을 확인할 수 있습니다.
