@@ -19,4 +19,10 @@ describe('UserStatus', () => {
   it('enumName은 문자열이 반환된다', () => {
     expect(UserStatus.READY.enumName).toBe('READY');
   });
+
+  it('enum filter를 통해 조건으로 값을 찾아낼 수도 있다', () => {
+    const userStatuses = UserStatus.filter((e) => e.name === '미인증');
+    expect(userStatuses).toHaveLength(1);
+    expect(userStatuses[0].enumName).toBe('READY');
+  });
 });
