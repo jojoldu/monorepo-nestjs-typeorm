@@ -3,6 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { ApiAppModule } from '../../src/ApiAppModule';
 import { getConnection } from 'typeorm';
+import { setNestApp } from '@app/common-config/setNextWebApp';
 
 describe('UserApiController (e2e)', () => {
   let app: INestApplication;
@@ -13,6 +14,7 @@ describe('UserApiController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    setNestApp(app); // ClassSerializerInterceptor 적용
     await app.init();
   });
 
