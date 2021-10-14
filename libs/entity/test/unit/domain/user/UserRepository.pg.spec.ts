@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '@app/entity/domain/user/User.entity';
 import { createQueryBuilder, getConnection, Repository } from 'typeorm';
 import { UserModule } from '@app/entity/domain/user/UserModule';
-import { getPgTestTypeOrmModule } from '../../getPgTestTypeOrmModule';
+import { getPgTestTypeOrmModule } from '../../../getPgTestTypeOrmModule';
 import { UserQueryRepository } from '@app/entity/domain/user/UserQueryRepository';
 import { GroupModule } from '@app/entity/domain/group/GroupModule';
 import { Group } from '@app/entity/domain/group/Group.entity';

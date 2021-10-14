@@ -4,7 +4,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { BigintValueTransformer } from './BigintValueTransformer';
+import { BigintValueTransformer } from '../transformer/BigintValueTransformer';
 
 export abstract class BaseTimeEntity {
   @Generated('increment')

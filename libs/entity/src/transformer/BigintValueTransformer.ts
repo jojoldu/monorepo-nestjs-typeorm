@@ -17,7 +17,7 @@ import { ValueTransformer } from 'typeorm';
  </code>
  */
 export class BigintValueTransformer implements ValueTransformer {
-  to(entityValue: number) {
+  to(entityValue: number): number {
     return entityValue;
   }
 
