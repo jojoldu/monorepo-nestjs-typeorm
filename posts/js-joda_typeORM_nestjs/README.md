@@ -381,3 +381,10 @@ export abstract class BaseTimeEntity {
 
 다만, 조회조건으로는 바로 사용하지 못한다는 단점이 있어서, 이 점 때문에라도 이슈가 최대한 빨리 해결되길 기다리고 있습니다.
 
+## 4. createQueryBuilder Not Working
+
+직관적인 쿼리를 만들 수 있는 `createQueryBuilder` 를 쓸 경우에 이 `ValueTransformer` 가 작동하지 않습니다.  
+
+* [no respect to value transformer defined on the fields](https://github.com/typeorm/typeorm/issues/1990)
+
+그래서 `createQueryBuilder` 를 쓸 경우에는 `Date` 로 변환 후 `where` 에 적용하시거나, `find` 를 통한 조회 조건으로 변경이 필요합니다.
