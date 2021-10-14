@@ -11,6 +11,8 @@ import { LocalDateTransformer } from '@app/entity/transformer/LocalDateTransform
 import { LocalDate, LocalDateTime } from 'js-joda';
 import { LocalDateTimeTransformer } from '@app/entity/transformer/LocalDateTimeTransformer';
 import { Group } from '@app/entity/domain/group/Group.entity';
+import { UserStatus } from '@app/entity/domain/user/type/UserStatus';
+import { UserStatusTransformer } from '@app/entity/domain/user/type/UserStatusTransformer';
 
 @Entity()
 @Index('idx_user_1', ['group'])
@@ -23,6 +25,14 @@ export class User extends BaseTimeEntity {
 
   @Column()
   lastName: string;
+
+  @Column({
+    type: 'varchar',
+    length: 50,
+    transformer: new UserStatusTransformer(),
+    nullable: false,
+  })
+  status: UserStatus;
 
   @Column({ default: true })
   isActive: boolean;

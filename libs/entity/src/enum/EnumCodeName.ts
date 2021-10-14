@@ -1,4 +1,4 @@
-import { ICodeName } from '@app/entity/domain/ICodeName';
+import { ICodeName } from '@app/entity/enum/ICodeName';
 import { Expose } from 'class-transformer';
 
 export class EnumCodeName<T extends ICodeName> {

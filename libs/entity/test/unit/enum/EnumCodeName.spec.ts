@@ -1,5 +1,5 @@
 import { UserStatus } from '@app/entity/domain/user/type/UserStatus';
-import { EnumCodeName } from '@app/entity/domain/EnumCodeName';
+import { EnumCodeName } from '@app/entity/enum/EnumCodeName';
 
 describe('EnumCodeName', () => {
   it('ICodeName 의 구현체는 EnumCodeName으로 치환될 수 있다.', () => {
