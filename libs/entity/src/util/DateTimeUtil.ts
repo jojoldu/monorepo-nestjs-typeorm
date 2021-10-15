@@ -1,6 +1,23 @@
-import { convert, LocalDate, LocalDateTime, nativeJs } from 'js-joda';
+import {
+  convert,
+  DateTimeFormatter,
+  LocalDate,
+  LocalDateTime,
+  nativeJs,
+} from 'js-joda';
 
 export class DateTimeUtil {
+  static toString(localDate: LocalDate | LocalDateTime): string {
+    if (!localDate) {
+      return '';
+    }
+
+    if (localDate instanceof LocalDate) {
+      return localDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'));
+    }
+    return localDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd HH:mm:ss'));
+  }
+
   static toDate(localDate: LocalDate | LocalDateTime): Date {
     if (!localDate) {
       return null;

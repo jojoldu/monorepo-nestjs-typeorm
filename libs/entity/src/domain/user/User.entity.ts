@@ -59,6 +59,40 @@ export class User extends BaseTimeEntity {
   @JoinColumn({ name: 'group_id', referencedColumnName: 'id' })
   group: Group;
 
+  static signup(
+    firstName: string,
+    lastName: string,
+    orderDateTime: LocalDateTime,
+  ): User {
+    const user = new User();
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.status = UserStatus.READY;
+    user.isActive = true;
+    user.orderDate = orderDateTime.toLocalDate();
+    user.orderDateTime = orderDateTime;
+
+    return user;
+  }
+
+  static of(
+    firstName: string,
+    lastName: string,
+    status: UserStatus,
+    isActive: boolean,
+    orderDateTime: LocalDateTime,
+  ): User {
+    const user = new User();
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.status = status;
+    user.isActive = isActive;
+    user.orderDate = orderDateTime.toLocalDate();
+    user.orderDateTime = orderDateTime;
+
+    return user;
+  }
+
   static byName(firstName: string, lastName: string) {
     const user = new User();
     user.firstName = firstName;

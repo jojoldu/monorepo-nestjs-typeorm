@@ -5,6 +5,8 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ResponseEntity } from '@app/common-config/res/ResponseEntity';
+import { UserShowDto } from './dto/UserShowDto';
+import { LocalDateTime } from 'js-joda';
 
 @Controller('/user')
 @ApiTags('유저 API')
@@ -25,6 +27,13 @@ export class UserApiController {
   getHello(): ResponseEntity<string> {
     this.logger.info('>>>>>>>>>>> Test');
     return ResponseEntity.OK_WITH(this.userApiService.getHello());
+  }
+
+  @Get('/show')
+  show(): ResponseEntity<UserShowDto> {
+    return ResponseEntity.OK_WITH(
+      new UserShowDto(User.signup('KilDong', 'Hong', LocalDateTime.now())),
+    );
   }
 
   @Get('/users')
