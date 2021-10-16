@@ -3,7 +3,8 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import * as path from 'path';
 
 export function getPgRealTypeOrmModule() {
-  const entityPath = path.join(__dirname, '../src/domain/**/*.entity.ts');
+  console.log(`currentPath=${__dirname}`);
+  const entityPath = path.join(__dirname, '**/*.entity.ts');
   console.log(`entityPath=${entityPath}`);
   return TypeOrmModule.forRoot({
     type: 'postgres',

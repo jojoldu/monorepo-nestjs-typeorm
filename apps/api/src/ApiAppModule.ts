@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UserApiModule } from './user/UserApiModule';
-import { getPgRealTypeOrmModule } from '@app/entity/config/getPgRealTypeOrmModule';
+import { getPgRealTypeOrmModule } from '../../../libs/entity/getPgRealTypeOrmModule';
 import { WinstonModule } from 'nest-winston';
 import { getWinstonLogger } from '@app/common-config/getWinstonLogger';
 
