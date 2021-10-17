@@ -17,6 +17,10 @@ export class UserApiService {
     return 'Hello World!';
   }
 
+  async signup(signupUser: User): Promise<void> {
+    await this.userRepository.save(signupUser);
+  }
+
   async findAll(): Promise<User[]> {
     return await this.userRepository.find();
   }

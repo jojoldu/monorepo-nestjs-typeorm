@@ -1,11 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { ApiAppModule } from '../../src/ApiAppModule';
 import { getConnection, Repository } from 'typeorm';
 import { setNestApp } from '@app/common-config/setNextWebApp';
 import { User } from '@app/entity/domain/user/User.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { ResponseEntity } from '@app/common-config/res/ResponseEntity';
+import { ResponseStatus } from '@app/common-config/res/ResponseStatus';
+import { UserSignupReq } from '../../src/user/dto/UserSignupReq';
+import { LocalDateTime } from 'js-joda';
+import { DateTimeUtil } from '@app/entity/util/DateTimeUtil';
 
 describe('UserApiController (e2e)', () => {
   let app: INestApplication;
@@ -47,5 +52,28 @@ describe('UserApiController (e2e)', () => {
     expect(data.firstName).toBe('KilDong');
     expect(data.lastName).toBe('Hong');
     expect(data.orderDateTime).toBe('2021-10-17 00:00:00');
+  });
+
+  it('/signup (POST)', async () => {
+    const firstName = 'KilDong';
+    const lastName = 'Hong';
+    const dateTime = LocalDateTime.of(2021, 10, 17, 0, 0, 0);
+
+    const req = UserSignupReq.of(firstName, lastName, dateTime);
+    const res = await request(app.getHttpServer())
+      .post('/user/signup')
+      .send({
+        firstName: firstName,
+        lastName: lastName,
+        orderDateTime: DateTimeUtil.toString(dateTime),
+      });
+
+    expect(res.status).toBe(HttpStatus.CREATED);
+    const body: ResponseEntity<string> = res.body;
+    expect(body.statusCode).toBe(ResponseStatus.OK);
+
+    const user = await userRepository.findOne();
+    expect(user.firstName).toBe(firstName);
+    expect(user.lastName).toBe(lastName);
   });
 });

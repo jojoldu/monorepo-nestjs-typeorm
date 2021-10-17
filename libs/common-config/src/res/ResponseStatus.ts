@@ -1,4 +1,4 @@
 export enum ResponseStatus {
-  OK,
-  SERVER_ERROR,
+  OK = 'OK',
+  SERVER_ERROR = 'SERVER_ERROR',
 }
