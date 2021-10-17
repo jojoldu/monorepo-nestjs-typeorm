@@ -5,6 +5,7 @@ import { UserModule } from '@app/entity/domain/user/UserModule';
 import { UserApiQueryRepository } from '../../../src/user/UserApiQueryRepository';
 import { getPgTestTypeOrmModule } from '../../../../../libs/entity/test/getPgTestTypeOrmModule';
 import { UserApiService } from '../../../src/user/UserApiService';
+import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('UserApiQueryRepository', () => {
   let userApiQueryRepository: UserApiQueryRepository;
@@ -19,7 +20,7 @@ describe('UserApiQueryRepository', () => {
     userApiQueryRepository = module.get<UserApiQueryRepository>(
       UserApiQueryRepository,
     );
-    userRepository = module.get('UserRepository');
+    userRepository = module.get(getRepositoryToken(User));
   });
 
   beforeEach(async () => {

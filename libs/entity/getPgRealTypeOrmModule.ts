@@ -3,8 +3,8 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import * as path from 'path';
 
 export function getPgRealTypeOrmModule() {
-  console.log(`currentPath=${__dirname}`);
-  const entityPath = path.join(__dirname, '**/*.entity.ts');
+  console.log(`current_path=${__dirname}`);
+  const entityPath = path.join(__dirname, 'src/domain/**/*.entity.ts');
   console.log(`entityPath=${entityPath}`);
   return TypeOrmModule.forRoot({
     type: 'postgres',
@@ -14,7 +14,9 @@ export function getPgRealTypeOrmModule() {
     password: 'test',
     database: 'test',
     entities: [entityPath],
+    autoLoadEntities: true,
     synchronize: true,
+    logging: false,
     namingStrategy: new SnakeNamingStrategy(),
   });
 }
