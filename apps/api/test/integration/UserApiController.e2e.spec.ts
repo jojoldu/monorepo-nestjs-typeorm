@@ -8,7 +8,6 @@ import { User } from '@app/entity/domain/user/User.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ResponseEntity } from '@app/common-config/res/ResponseEntity';
 import { ResponseStatus } from '@app/common-config/res/ResponseStatus';
-import { UserSignupReq } from '../../src/user/dto/UserSignupReq';
 import { LocalDateTime } from 'js-joda';
 import { DateTimeUtil } from '@app/entity/util/DateTimeUtil';
 
@@ -59,7 +58,6 @@ describe('UserApiController (e2e)', () => {
     const lastName = 'Hong';
     const dateTime = LocalDateTime.of(2021, 10, 17, 0, 0, 0);
 
-    const req = UserSignupReq.of(firstName, lastName, dateTime);
     const res = await request(app.getHttpServer())
       .post('/user/signup')
       .send({
