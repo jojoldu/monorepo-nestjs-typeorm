@@ -47,7 +47,6 @@ describe('UserApiController (e2e)', () => {
 
     expect(res.status).toBe(200);
     const data = res.body.data;
-    console.log(`>>>>>>>>>>>>>> response body = ${JSON.stringify(data)}`);
     expect(data.firstName).toBe('KilDong');
     expect(data.lastName).toBe('Hong');
     expect(data.orderDateTime).toBe('2021-10-17 00:00:00');
@@ -73,5 +72,6 @@ describe('UserApiController (e2e)', () => {
     const user = await userRepository.findOne();
     expect(user.firstName).toBe(firstName);
     expect(user.lastName).toBe(lastName);
+    expect(user.orderDateTime.isEqual(dateTime)).toBeTruthy();
   });
 });
