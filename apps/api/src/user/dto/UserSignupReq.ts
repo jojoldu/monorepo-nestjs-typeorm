@@ -2,12 +2,17 @@ import { LocalDateTime } from 'js-joda';
 import { Expose, Transform } from 'class-transformer';
 import { DateTimeUtil } from '@app/entity/util/DateTimeUtil';
 import { User } from '@app/entity/domain/user/User.entity';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class UserSignupReq {
   @Expose()
+  @IsNotEmpty()
+  @IsString()
   firstName: string;
 
   @Expose()
+  @IsNotEmpty()
+  @IsString()
   lastName: string;
 
   @Expose()

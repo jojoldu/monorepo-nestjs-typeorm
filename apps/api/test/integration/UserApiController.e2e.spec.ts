@@ -75,4 +75,21 @@ describe('UserApiController (e2e)', () => {
     expect(user.lastName).toBe(lastName);
     expect(user.orderDateTime.isEqual(dateTime)).toBeTruthy();
   });
+
+  it('/signup 시 firstName이 없으면 벨리데이션에러 발생한다', async () => {
+    const lastName = 'Hong';
+    const dateTime = LocalDateTime.of(2021, 10, 17, 0, 0, 0);
+
+    const res = await request(app.getHttpServer())
+      .post('/user/signup')
+      .send({
+        lastName: lastName,
+        orderDateTime: DateTimeUtil.toString(dateTime),
+      });
+
+    expect(res.status).toBe(HttpStatus.BAD_REQUEST);
+    const body: ResponseEntity<string> = res.body;
+    expect(body.message[0]).toBe('firstName must be a string');
+    expect(body.message[1]).toBe('firstName should not be empty');
+  });
 });
