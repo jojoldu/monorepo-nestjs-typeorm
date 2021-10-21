@@ -36,13 +36,6 @@ describe('UserApiController (e2e)', () => {
     await userRepository.clear();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
-  });
-
   it('/show (GET)', async () => {
     const res = await request(app.getHttpServer()).get('/user/show');
 
