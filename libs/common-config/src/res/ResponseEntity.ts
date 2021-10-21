@@ -1,19 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ResponseStatus } from '@app/common-config/res/ResponseStatus';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 
 export class ResponseEntity<T> {
-  @ApiProperty()
-  @Exclude()
-  private readonly _statusCode: string;
-
-  @ApiProperty()
-  @Exclude()
-  private readonly _message: string;
-
-  @ApiProperty()
-  @Exclude()
-  private readonly _data: T;
+  @Exclude() private readonly _statusCode: string;
+  @Exclude() private readonly _message: string;
+  @Exclude() private readonly _data: T;
 
   private constructor(status: ResponseStatus, message: string, data: T) {
     this._statusCode = ResponseStatus[status];
@@ -41,14 +33,20 @@ export class ResponseEntity<T> {
     return new ResponseEntity<string>(ResponseStatus.SERVER_ERROR, message, '');
   }
 
+  @ApiProperty()
+  @Expose()
   get statusCode(): string {
     return this._statusCode;
   }
 
+  @ApiProperty()
+  @Expose()
   get message(): string {
     return this._message;
   }
 
+  @ApiProperty()
+  @Expose()
   get data(): T {
     return this._data;
   }
