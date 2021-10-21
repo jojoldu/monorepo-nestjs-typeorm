@@ -4,8 +4,6 @@ import * as path from 'path';
 
 export function getPgTestTypeOrmModule() {
   const logging = process.env.LOGGING;
-  console.log(`logging=${logging}`);
-  console.log(`env=${JSON.stringify(process.env)}`);
 
   return TypeOrmModule.forRoot({
     type: 'postgres',

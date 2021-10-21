@@ -10,6 +10,7 @@ import { ResponseEntity } from '@app/common-config/res/ResponseEntity';
 import { ResponseStatus } from '@app/common-config/res/ResponseStatus';
 import { LocalDateTime } from 'js-joda';
 import { DateTimeUtil } from '@app/entity/util/DateTimeUtil';
+import { getPgTestTypeOrmModule } from '../../../../libs/entity/test/getPgTestTypeOrmModule';
 
 describe('UserApiController (e2e)', () => {
   let app: INestApplication;
@@ -17,7 +18,7 @@ describe('UserApiController (e2e)', () => {
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [ApiAppModule],
+      imports: [ApiAppModule, getPgTestTypeOrmModule()],
     }).compile();
 
     app = module.createNestApplication();

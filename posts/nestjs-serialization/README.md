@@ -91,7 +91,7 @@ async function bootstrap() {
   const app = await NestFactory.create(ApiAppModule);
   ....
 
-  setNestApp(app);
+  setNestApp(app); // 인터셉터 등록 함수 실행
 
   await app.listen(3000);
 }
