@@ -50,7 +50,12 @@ export class UserApiController {
     @Body() userSignupReq: UserSignupReq,
   ): Promise<ResponseEntity<string>> {
     const dto = plainToClass(UserSignupReq, userSignupReq);
-    await this.userApiService.signup(dto.toEntity());
-    return ResponseEntity.OK();
+    try {
+      await this.userApiService.signup(dto.toEntity());
+      return ResponseEntity.OK();
+    } catch (e) {
+      this.logger.error(`dto = ${JSON.stringify(userSignupReq)}`, e);
+      return ResponseEntity.ERROR_WITH('회원 가입에 실패하였습니다.');
+    }
   }
 }

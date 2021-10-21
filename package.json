@@ -29,6 +29,7 @@
     "@nestjs/typeorm": "^8.0.2",
     "@types/winston": "^2.4.4",
     "class-transformer": "0.4.0",
+    "class-validator": "^0.13.1",
     "js-joda": "^1.11.0",
     "nest-winston": "^1.6.0",
     "pg": "^8.7.1",
