@@ -8,7 +8,6 @@ import { ResponseEntity } from '@app/common-config/res/ResponseEntity';
 import { UserShowDto } from './dto/UserShowDto';
 import { LocalDateTime } from 'js-joda';
 import { UserSignupReq } from './dto/UserSignupReq';
-import { plainToClass } from 'class-transformer';
 
 @Controller('/user')
 @ApiTags('유저 API')
@@ -46,15 +45,12 @@ export class UserApiController {
   }
 
   @Post('/signup')
-  async signup(
-    @Body() userSignupReq: UserSignupReq,
-  ): Promise<ResponseEntity<string>> {
-    const dto = plainToClass(UserSignupReq, userSignupReq);
+  async signup(@Body() dto: UserSignupReq): Promise<ResponseEntity<string>> {
     try {
       await this.userApiService.signup(dto.toEntity());
       return ResponseEntity.OK();
     } catch (e) {
-      this.logger.error(`dto = ${JSON.stringify(userSignupReq)}`, e);
+      this.logger.error(`dto = ${JSON.stringify(dto)}`, e);
       return ResponseEntity.ERROR_WITH('회원 가입에 실패하였습니다.');
     }
   }

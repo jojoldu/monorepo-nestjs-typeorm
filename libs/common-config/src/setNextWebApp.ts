@@ -4,5 +4,5 @@ import { Reflector } from '@nestjs/core';
 
 export function setNestApp<T extends INestApplication>(app: T): void {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-  app.useGlobalPipes(new ValidationPipe()); // for validator
+  app.useGlobalPipes(new ValidationPipe({ transform: true })); // for validator
 }
