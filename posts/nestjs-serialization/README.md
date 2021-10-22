@@ -16,12 +16,100 @@
 한 객체가 변경이 발생하면 해당 객체에 의존하는 다른 객체들도 변경해야 하기 때문에 이들의 변경 범위를 최소화 하기 위해 캡슐화를 사용합니다.  
 이를 위해 일반적으로 **모든 내부 필드는 private으로 직접 접근을 차단**하고, **외부에서의 접근은 지정된 메소드를 통해서만** 진행하도록 하는데요.  
 
-* 이와 관련해서 [이전 글](https://jojoldu.tistory.com/592)을 참고해보시면 좋습니다.
+* 이와 관련해서 [이전 글-객체지향 (Object Oriented) 디자인 (Design)](https://jojoldu.tistory.com/592)을 참고해보시면 좋습니다.
 
-그래서 API 응답용 Dto은 다음과 같이 작성하게 됩니다.
+### 1-1. class-transformer 의존성 등록
+
+JSON 직렬화를 위해서는 직렬화 라이브러리가 필요한데요.  
+NestJS에서는 공식적으로 [class-transformer](https://github.com/typestack/class-transformer)를 사용하고 있습니다.  
+
+데코레이터 기반의 직렬화/역직렬화 라이브러리인데요.  
+최근 나오는 많은 MVC 프레임워크들이 이 [class-transformer](https://github.com/typestack/class-transformer) 를 사용하고 있습니다.  
+
+본인의 NestJS package.json에 `class-transformer` 와 `reflect-metadata` 가 포함되어있는지 확인 하시고, 포함안되어있다면 두 패키지를 모두 설치해주세요.
+
+```bash
+yarn add reflect-metadata class-transformer
+```
+
+* `reflect-metadata` 는 리플렉션을 지원하는 라이브러리이며, 코드의 메타 정보 (메소드/필드/변수 등)에 접근하기 위한 기술입니다.
+* 대부분의 데코레이터들은 리플렉션 개념을 통해 필요한 속성을 추가하거나 제거하는 등의 행동을 할 수 있습니다.
+* Java 나 C# 에서 이미 유명한 개념이라 관련해서 꼭 NodeJS로 키워드를 검색하기 보다는 Java나 C#의 컨텐츠를 함께 보시는 것을 추천드립니다.
+
+### 1-2. 글로벌 인터셉터 등록
+
+필요한 패키지들 (`class-transformer`, `reflect-metadata`)이 모두 설치되셨다면, 이제 **모든 HTTP 요청에서 직렬화가 가능하도록** 직렬화 인터셉터를 글로벌로 추가합니다.
+
+```typescript
+app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+```
+
+작동 방식은 간단합니다.
+
+* `ClassSerializerInterceptor` 클래스에서 HTTP로 넘어온 는 메소드에서 리턴된 값을 가져 와서 class-transformer 패키지에서  `classToPlain()`함수를 호출합니다.
+
+저 같은 경우엔 이런 글로벌 설정을 별도의 함수로 만들어서 사용하는데요.
+
+* 모노레포를 주로 쓰기 때문에 여러 `apps` 모듈에서 공통적으로 사용하기 위함
+* E2E (End To End) 테스트에서도 실 서비스와 동일한 인터셉터 설정을 위해 공통적으로 사용하기 위함
+
+과 같은 이유 때문입니다.  
+
+그래서 아래와 같이 글로벌 인터셉터들의 설정을 모아두는 함수를 하나 만들어둡니다.
+
+```typescript
+export function setNestApp<T extends INestApplication>(app: T): void {
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  ...
+}
+```
+
+그리고 이 함수를 `main.ts` 와 각 E2E 테스트에서 호출합니다.  
+
+**main.ts**
+
+```typescript
+async function bootstrap() {
+  const app = await NestFactory.create(ApiAppModule);
+  ...
+
+  setNestApp(app);
+
+  ...
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+**xxx.e2e.ts**
+
+```typescript
+describe('UserApiController (e2e)', () => {
+  let app: INestApplication;
+  let userRepository: Repository<User>;
+
+  beforeAll(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [ApiAppModule],
+    }).compile();
+
+    app = module.createNestApplication();
+    userRepository = module.get(getRepositoryToken(User));
+
+    setNestApp(app); // ClassSerializerInterceptor 적용
+    await app.init();
+  });
+```
+
+이렇게 설정한 뒤에, 이제 테스트를 한번 해보겠습니다.
+
+### 1-3. 테스트용 Dto 생성
+
+API 응답용 Dto를 다음과 같이 작성합니다.
 
 ```typescript
 export class UserShowDto {
+  // (1)
   @Exclude() private readonly _id: number;
   @Exclude() private readonly _firstName: string;
   @Exclude() private readonly _lastName: string;
@@ -31,11 +119,11 @@ export class UserShowDto {
     this._id = user.id;
     this._firstName = user.firstName;
     this._lastName = user.lastName;
-    this._orderDateTime = user.orderDateTime.plusDays(1); // (1)
+    this._orderDateTime = user.orderDateTime.plusDays(1); // (2)
   }
 
-  @ApiProperty() // Swagger용
-  @Expose() // (2)
+  @ApiProperty()
+  @Expose() // (3)
   get id(): number {
     return this._id;
   }
@@ -55,48 +143,39 @@ export class UserShowDto {
   @ApiProperty()
   @Expose()
   get orderDateTime(): string {
-    return DateTimeUtil.toString(this._orderDateTime); // (3)
+    return DateTimeUtil.toString(this._orderDateTime); // (4)
   }
 }
 ```
 
-> 제가 사용하는 날짜 타입은 [js-joda](https://js-joda.github.io/js-joda/) 입니다.
+> 제가 사용하는 날짜 타입 라이브러리는 [js-joda](https://js-joda.github.io/js-joda/) 입니다.
 
-(1) `user.orderDateTime.plusDays(1);`
+
+
+(1) `Exclude()`
+
+* 내부 멤버 변수인 `_id` 등을 JSON 직렬화 대상에서 제외합니다.
+* class-transformer의 경우 `private` 변수라도 직렬화를 시킬 수 있기 때문에 **노출을 원하지 않는 곳**들은 모두 Exclude() 처리하는 것이 좋습니다
+
+(2) `user.orderDateTime.plusDays(1);`
 
 * Dto 내부에서 쉽게 연산이 가능하도록 **노출용 타입이 아닌**, 원래 타입 그대로를 저장하고 재사용합니다.
 * 날짜값의 경우 JSON으로 안전하게 직렬화 하기 위해서는 문자열을 사용하게 되는데, 생성자로 받자마자 바로 문자열로 변환할 경우, 반환하기전 추가 연산이 필요한 경우 다시 날짜타입(`LocalDateTime`)으로 변환해야하는 과정이 필요합니다.
 * 그 외 다양한 요소에서 **원본 타입과 노출용 타입은 분리**하는 것이 장점이 많습니다.
 
-(2) `@Expose()`
+(3) `@Expose()`
 
 * `class-transformer` 의 데코레이터로, 직렬화 대상 필드를 지정합니다.
 * 여기서는 모든 멤버변수는 `@Exclude()` 로 직렬화 대상에서 제외하고, 온전히 노출에만 사용할 수 있는 getter 메소드에만 `@Expose()` 를 선언합니다.
 
-(3) `DateTimeUtil.toString(this._orderDateTime);`
+(4) `DateTimeUtil.toString(this._orderDateTime);`
 
 * API 로 약속된 포맷으로 날짜값을 보내기 위한 전환 작업을 합니다.
 
 
-### 글로벌 인터셉터 등록
 
-```typescript
-export function setNestApp<T extends INestApplication>(app: T): void {
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-}
-```
 
-```typescript
-async function bootstrap() {
-  const app = await NestFactory.create(ApiAppModule);
-  ....
-
-  setNestApp(app); // 인터셉터 등록 함수 실행
-
-  await app.listen(3000);
-}
-bootstrap();
-```
+### 1-4. 테스트 코드로 검증하기
 
 
 ```typescript
@@ -112,7 +191,39 @@ it('/show (GET)', async () => {
 ```
 
 > 모든 코드는 [Github](https://github.com/jojoldu/monorepo-nestjs-typeorm/tree/master/apps/api)에 있습니다.
-## 요청 객체 직렬화하기
+
+## 2. 요청 객체 직렬화하기
+
+HTTP 요청시 호출 순서는 글로벌 인터셉터 -> 글로벌 파이프로 진행이 됩니다.  
+
+### 글로벌 파이프로
+
+[class-validator](https://github.com/typestack/class-validator) 는 class-transformer와 비슷하게 데코레이터 기반의 클래스 벨리데이션 라이브러리입니다.
+
+```typescript
+export function setNestApp<T extends INestApplication>(app: T): void {
+  ...
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  ...
+}
+```
+
+* `ValidationPipe` 는 `class-validator` 의 데코레이터 기반으로 벨리데이션을 지원하는 파이프입니다.
+* 해당 파이프에 추가 옵션으로 `{ transform: true }` 을 넣게 되면, 벨리데이션이 끝난 요청 객체를 실제 클래스로 변환되어 Controller에서 받을 수 있게 됩니다.
+
+그래서 다음과 같이
+```typescript
+@Post('/signup')
+async signup(@Body() dto: UserSignupReq): Promise<ResponseEntity<string>> {
+  try {
+    await this.userApiService.signup(dto.toEntity()); // JSON이 아닌 UserSignupReq 클래스의 인스턴스라서 바로 멤버 메소드를 사용할 수 있다
+    return ResponseEntity.OK();
+  } catch (e) {
+    this.logger.error(`dto = ${JSON.stringify(dto)}`, e);
+    return ResponseEntity.ERROR_WITH('회원 가입에 실패하였습니다.');
+  }
+}
+```
 
 ### 문자열값을 날짜등 다른 타입으로 변환하기
 
