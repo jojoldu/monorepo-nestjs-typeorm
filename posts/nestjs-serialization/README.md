@@ -3,7 +3,7 @@
 저 같은 경우에 최대한 Dto를 불변으로 만들기 위해 setter나 public 필드는 배제하는데요.  
 어쩔수 없이 public 필드 (혹은 public setter)를 써야하는 경우 (TypeORM의 Entity 등)를 제외하고는 무조건이다 싶을 정도로 **딱 필요한 정도로만 외부 제공용 메소드**를 만들어서 사용합니다.  
 
-이를 위해서는 Controller에서 사용하는 응답/요청 Dto 객체의 직렬화는 필수로 진행하게 됩니다.    
+이를 위해서는 Controller에서 사용하는 응답/요청 Dto 객체의 직렬화는 필수로 진행하게 됩니다.  
 
 이번 시간에는 이런 상황등을 대비해서 응답/요청 객체의 직렬화 하는 방법을 진행해보겠습니다.
 
@@ -46,9 +46,12 @@ app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
 작동 방식은 간단합니다.
 
-* `ClassSerializerInterceptor` 클래스에서 HTTP로 넘어온 는 메소드에서 리턴된 값을 가져 와서 class-transformer 패키지에서  `classToPlain()`함수를 호출합니다.
+* `ClassSerializerInterceptor` 클래스에서 HTTP 응답값을 중간에서 가로채 (Interceptor) `class-transformer` 의 `classToPlain()` 함수를 호출하여 JSON 직렬화를 해서 반환합니다.
 
-저 같은 경우엔 이런 글로벌 설정을 별도의 함수로 만들어서 사용하는데요.
+![interceptor](./images/interceptor.png)
+
+
+저 같은 경우엔 이런 **글로벌 설정을 별도의 함수로** 만들어서 사용하는데요.
 
 * 모노레포를 주로 쓰기 때문에 여러 `apps` 모듈에서 공통적으로 사용하기 위함
 * E2E (End To End) 테스트에서도 실 서비스와 동일한 인터셉터 설정을 위해 공통적으로 사용하기 위함
@@ -101,7 +104,7 @@ describe('UserApiController (e2e)', () => {
   });
 ```
 
-이렇게 설정한 뒤에, 이제 테스트를 한번 해보겠습니다.
+모든 설정이 끝났다면 , 이제 테스트를 한번 해보겠습니다.
 
 ### 1-3. 테스트용 Dto 생성
 
@@ -148,9 +151,7 @@ export class UserShowDto {
 }
 ```
 
-> 제가 사용하는 날짜 타입 라이브러리는 [js-joda](https://js-joda.github.io/js-joda/) 입니다.
-
-
+> 여기서 사용하는 날짜 타입 라이브러리는 [js-joda](https://js-joda.github.io/js-joda/) 입니다.
 
 (1) `Exclude()`
 
@@ -172,11 +173,11 @@ export class UserShowDto {
 
 * API 로 약속된 포맷으로 날짜값을 보내기 위한 전환 작업을 합니다.
 
+해당 데코레이터들이 실제 API 응답에서도 잘 되는지 한번 검증해봅니다.
 
+### 1-4. 테스트
 
-
-### 1-4. 테스트 코드로 검증하기
-
+먼저 테스트 코드로 기능을 검증해봅니다.
 
 ```typescript
 it('/show (GET)', async () => {
@@ -187,16 +188,38 @@ it('/show (GET)', async () => {
   expect(data.firstName).toBe('KilDong');
   expect(data.lastName).toBe('Hong');
   expect(data.orderDateTime).toBe('2021-10-17 00:00:00');
+
+  // private field assert
+  expect(data._firstName).toBeUndefined();
+  expect(data._lastName).toBeUndefined();
+  expect(data._orderDateTime).toBeUndefined();
 });
 ```
 
 > 모든 코드는 [Github](https://github.com/jojoldu/monorepo-nestjs-typeorm/tree/master/apps/api)에 있습니다.
 
-## 2. 요청 객체 직렬화하기
+테스트 코드로는 2가지를 검증했습니다.
 
-HTTP 요청시 호출 순서는 글로벌 인터셉터 -> 글로벌 파이프로 진행이 됩니다.  
+* `getter` 메소드가 정상적으로 JSON 변환이 되었는지
+* `private` 멤버 변수가 JSON에서 정상적으로 제외되었는지
 
-### 글로벌 파이프로
+테스트를 수행해보면?
+
+![test1](./images/test1.png)
+
+정상적으로 기능이 작동한 것을 알 수 있습니다.  
+  
+테스트 코드를 작성했지만, 그래도 의심이 된다면 브라우저에서도 API를 호출해서 한번 확인해봅니다.
+
+![browser1](./images/browser1.png)
+
+응답용 JSON 직렬화가 잘 작동된 것을 확인하였습니다.
+
+## 2. 요청 객체 역직렬화하기
+
+> HTTP 요청시 인터셉터와 파이프의 호출 순서는 인터셉터 -> 파이프가 됩니다.
+
+### 글로벌 파이프로 요청 객체 직렬화 등록
 
 [class-validator](https://github.com/typestack/class-validator) 는 class-transformer와 비슷하게 데코레이터 기반의 클래스 벨리데이션 라이브러리입니다.
 
@@ -212,6 +235,7 @@ export function setNestApp<T extends INestApplication>(app: T): void {
 * 해당 파이프에 추가 옵션으로 `{ transform: true }` 을 넣게 되면, 벨리데이션이 끝난 요청 객체를 실제 클래스로 변환되어 Controller에서 받을 수 있게 됩니다.
 
 그래서 다음과 같이
+
 ```typescript
 @Post('/signup')
 async signup(@Body() dto: UserSignupReq): Promise<ResponseEntity<string>> {
@@ -227,6 +251,9 @@ async signup(@Body() dto: UserSignupReq): Promise<ResponseEntity<string>> {
 
 ### 문자열값을 날짜등 다른 타입으로 변환하기
 
+날짜 타입의 경우 어떻게 JSON 데이터를 원하는 날짜 타입으로 변환할 수 있을까요?  
+JSON 데이터 상에서는 이들은 **특정 포맷의 문자열** 값인데요.  
+
 ```typescript
 export class UserSignupReq {
   ...
@@ -239,6 +266,28 @@ export class UserSignupReq {
   ...
 }
 ```
+
+```typescript
+export class DateTimeUtil {
+  private static DATE_FORMATTER = DateTimeFormatter.ofPattern('yyyy-MM-dd');
+  private static DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(
+    'yyyy-MM-dd HH:mm:ss',
+  );
+
+  ...
+  static toLocalDateTimeBy(strDate: string): LocalDateTime {
+    if (!strDate) {
+      return null;
+    }
+
+    return LocalDateTime.parse(strDate, DateTimeUtil.DATE_TIME_FORMATTER);
+  }
+}
+```
+
+여기서 `property.value` 의 값이 `any` 입니다.  
+그래서 그대로 넣게 되면 문자열이 아니라서 한번은 문자열로 변환이 필요합니다.  
+이 유틸 메소드는 프로젝트 여기저기에서 사용되니, 범용성과 안정성을 위해 **문자열 타입만 허용**하도록 하고, 호출자인 `@Transform` 에서 문자열로 변환해서 넣습니다.
 
 
 ```typescript
