@@ -219,9 +219,21 @@ it('/show (GET)', async () => {
 
 > HTTP 요청시 인터셉터와 파이프의 호출 순서는 인터셉터 -> 파이프가 됩니다.
 
-### 글로벌 파이프로 요청 객체 직렬화 등록
+요청 객체의 경우엔 JSON -> 클래스 인스턴스로 변환하는 역직렬화가 필요합니다.  
+이 부분은 `class-transformer` 외에 `class-validator` 가 추가로 필요합니다.  
+  
+만약 본인 프로젝트에 [class-validator](https://github.com/typestack/class-validator) 가 아직 없다면 설치를 해줍니다.
 
-[class-validator](https://github.com/typestack/class-validator) 는 class-transformer와 비슷하게 데코레이터 기반의 클래스 벨리데이션 라이브러리입니다.
+```bash
+yarn add class-validator
+```
+
+### 2-1. 글로벌 파이프로 요청 객체 역직렬화 등록
+
+[class-validator](https://github.com/typestack/class-validator) 는 class-transformer와 비슷하게 데코레이터 기반의 클래스 벨리데이션 라이브러리입니다.  
+  
+NestJS 에서는 `class-validator` 의 **데코레이터를 기반으로 Dto들의 검증을 권장**하는데요.  
+이를 위해서는 `ValidationPipe` 를 사용하면 되는데, `ValidationPipe` 에서는 추가 옵션으로 **요청 객체를 역직렬화**할 수 있습니다.
 
 ```typescript
 export function setNestApp<T extends INestApplication>(app: T): void {
@@ -231,10 +243,28 @@ export function setNestApp<T extends INestApplication>(app: T): void {
 }
 ```
 
-* `ValidationPipe` 는 `class-validator` 의 데코레이터 기반으로 벨리데이션을 지원하는 파이프입니다.
-* 해당 파이프에 추가 옵션으로 `{ transform: true }` 을 넣게 되면, 벨리데이션이 끝난 요청 객체를 실제 클래스로 변환되어 Controller에서 받을 수 있게 됩니다.
+> 이런 파이프 역시 앞에서 만들어둔 `setNestApp` 함수에 추가해서 여러 apps / 여러 E2E 테스트에서 동일하게 적용할 수 있도록 합니다.
 
-그래서 다음과 같이
+* `ValidationPipe` 는 `class-validator` 의 데코레이터 기반으로 벨리데이션을 지원하는 파이프입니다.
+* 해당 파이프에 추가 옵션으로 `{ transform: true }` 을 넣게 되면, 벨리데이션이 끝난 요청 객체를 실제 클래스의 인스턴스로 변환되어 Controller에서 받을 수 있게 됩니다.
+
+그래서 원래는 다음과 같은 코드를
+
+```typescript
+@Post('/signup')
+async signup(@Body() dto: UserSignupReq): Promise<ResponseEntity<string>> {
+  try {
+    const req = plainToClass(UserSignupReq, dto); // json -> 인스턴스
+    await this.userApiService.signup(dto.toEntity()); 
+    return ResponseEntity.OK();
+  } catch (e) {
+    this.logger.error(`dto = ${JSON.stringify(dto)}`, e);
+    return ResponseEntity.ERROR_WITH('회원 가입에 실패하였습니다.');
+  }
+}
+```
+
+아래와 같이 `plainToClass` 없이 곧바로 인스턴스를 사용할 수 있습니다.
 
 ```typescript
 @Post('/signup')
@@ -249,23 +279,46 @@ async signup(@Body() dto: UserSignupReq): Promise<ResponseEntity<string>> {
 }
 ```
 
-### 문자열값을 날짜등 다른 타입으로 변환하기
+이렇게 파이프를 등록하면 이후부터는 매번 `plainToClass`를 할 필요가 전혀 없습니다.
 
+### 2-2. 문자열값을 날짜등 다른 타입으로 변환하기
+
+요청 객체에 날짜타입이 있다면 어떨까요?  
 날짜 타입의 경우 어떻게 JSON 데이터를 원하는 날짜 타입으로 변환할 수 있을까요?  
+
+> 꼭 `Date`로의 변환을 이야기하는게 아닙니다.  
+> js-joda, date-fns, day.js 등의 날짜 타입으로의 변환을 이야기 합니다.
+
 JSON 데이터 상에서는 이들은 **특정 포맷의 문자열** 값인데요.  
+이를 `@Transform` 을 통해 진행할 수 있습니다.
 
 ```typescript
 export class UserSignupReq {
   ...
 
   @Expose()
-  @Transform((property) => {
-    return DateTimeUtil.toLocalDateTimeBy(property.value + '');
+  @Transform((property) => { // (1)
+    return DateTimeUtil.toLocalDateTimeBy(property.value + ''); // (2)
   })
   orderDateTime: LocalDateTime;
   ...
 }
 ```
+
+(1) `@Transform`
+
+* 추가 데이터 변환을 지원하는 `class-transformer`의 데코레이터입니다.
+* `orderDateTime` 으로 넘어온 값을 `property` 에 담아서 넘겨주기 때문에 여기서 `value` 를 추출해서 적절한 형태로 변환해서 반환합니다.
+* 주의하실 점은 `property` 는 **JSON 값만 있는게 아니기 때문에** `value` 로 값을 가져오셔야 합니다.
+
+(2) `property.value + ''`
+
+* `property.value` 의 값이 `any` 입니다.
+* 당연한 얘기지만, JSON에는 꼭 문자열만 있는게 아니기 때문에 어떤 타입이든 가능하도록 `any`가 되어있는데요.
+* 그래서 그대로 넣게 되면 **한번은 문자열로 변환이 필요**합니다.  
+* `DateTimeUtil.toLocalDateTimeBy` 는 **프로젝트 여기저기에서 사용**되니, 범용성과 안정성을 위해 **문자열 타입만 허용**하도록 하고, 호출자인 `@Transform` 에서 문자열로 변환해서 넣습니다.
+
+참고로 위 코드에서 사용된 `DateTimeUtil` 의 코드는 다음과 같습니다.
 
 ```typescript
 export class DateTimeUtil {
@@ -285,10 +338,7 @@ export class DateTimeUtil {
 }
 ```
 
-여기서 `property.value` 의 값이 `any` 입니다.  
-그래서 그대로 넣게 되면 문자열이 아니라서 한번은 문자열로 변환이 필요합니다.  
-이 유틸 메소드는 프로젝트 여기저기에서 사용되니, 범용성과 안정성을 위해 **문자열 타입만 허용**하도록 하고, 호출자인 `@Transform` 에서 문자열로 변환해서 넣습니다.
-
+이렇게 요청 객체의 역직렬화 코드가 작성되었다면, 잘 작동하는지 테스트코드를 작성해서 검증해보시면 됩니다.
 
 ```typescript
 it('/signup (POST)', async () => {
