@@ -10,6 +10,7 @@ import { ResponseEntity } from '@app/common-config/res/ResponseEntity';
 import { ResponseStatus } from '@app/common-config/res/ResponseStatus';
 import { LocalDateTime } from 'js-joda';
 import { DateTimeUtil } from '@app/entity/util/DateTimeUtil';
+import { UserShowDto } from '../../src/user/dto/UserShowDto';
 
 describe('UserApiController (e2e)', () => {
   let app: INestApplication;
@@ -39,7 +40,8 @@ describe('UserApiController (e2e)', () => {
     const res = await request(app.getHttpServer()).get('/user/show');
 
     expect(res.status).toBe(200);
-    const data = res.body.data;
+    const body: ResponseEntity<UserShowDto> = res.body;
+    const data = body.data;
     expect(data.firstName).toBe('KilDong');
     expect(data.lastName).toBe('Hong');
     expect(data.orderDateTime).toBe('2021-10-17 00:00:00');
