@@ -5,6 +5,7 @@ export class HackerNewsItem {
   descendants: number;
   id: number;
   kids: number[];
+  parent: number;
   score: number;
   time: number;
   title: string;
@@ -16,5 +17,9 @@ export class HackerNewsItem {
   get createTime(): LocalDateTime {
     const milliTime = this.time * 1000;
     return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliTime));
+  }
+
+  get isFirstItem(): boolean {
+    return !this.parent;
   }
 }

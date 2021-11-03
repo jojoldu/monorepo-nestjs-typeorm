@@ -28,6 +28,7 @@
     "@nestjs/swagger": "^5.0.9",
     "@nestjs/typeorm": "^8.0.2",
     "@types/winston": "^2.4.4",
+    "axios": "^0.24.0",
     "class-transformer": "0.4.0",
     "class-validator": "^0.13.1",
     "got": "^11.8.2",
