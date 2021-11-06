@@ -45,11 +45,6 @@ describe('UserApiController (e2e)', () => {
     expect(data.firstName).toBe('KilDong');
     expect(data.lastName).toBe('Hong');
     expect(data.orderDateTime).toBe('2021-10-17 00:00:00');
-
-    // private field assert
-    expect(data._firstName).toBeUndefined();
-    expect(data._lastName).toBeUndefined();
-    expect(data._orderDateTime).toBeUndefined();
   });
 
   it('/signup (POST)', async () => {
