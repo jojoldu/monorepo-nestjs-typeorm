@@ -5,13 +5,15 @@ import { HttpMethod } from './HttpMethod';
 export async function restTemplate<T>(
   method: HttpMethod,
   url: string,
-  requestBody: any,
+  data?: any,
+  headers?: any,
   classType?: { new (): T },
 ) {
   const response = await axios({
     method: method,
     url: url,
-    data: requestBody,
+    headers: headers,
+    data: data,
   });
 
   return plainToClass(classType, response.data);
