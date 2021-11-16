@@ -3,26 +3,35 @@ import { ResponseStatus } from '@app/common-config/res/ResponseStatus';
 import { Exclude, Expose } from 'class-transformer';
 
 export class ResponseEntity<T> {
-  @Exclude() private readonly _statusCode: string;
-  @Exclude() private readonly _message: string;
-  @Exclude() private readonly _data: T;
+  @Exclude() private _statusCode: string;
+  @Exclude() private _message: string;
+  @Exclude() private _data: T;
 
-  private constructor(status: ResponseStatus, message: string, data: T) {
-    this._statusCode = ResponseStatus[status];
-    this._message = message;
-    this._data = data;
+  constructor() {}
+
+  private static of<T>(
+    status: ResponseStatus,
+    message: string,
+    data: T,
+  ): ResponseEntity<T> {
+    const res = new ResponseEntity<T>();
+    res._statusCode = ResponseStatus[status];
+    res._message = message;
+    res._data = data;
+
+    return res;
   }
 
   static OK(): ResponseEntity<string> {
-    return new ResponseEntity<string>(ResponseStatus.OK, '', '');
+    return ResponseEntity.of<string>(ResponseStatus.OK, '', '');
   }
 
   static OK_WITH<T>(data: T): ResponseEntity<T> {
-    return new ResponseEntity<T>(ResponseStatus.OK, '', data);
+    return ResponseEntity.of<T>(ResponseStatus.OK, '', data);
   }
 
   static ERROR(): ResponseEntity<string> {
-    return new ResponseEntity<string>(
+    return ResponseEntity.of<string>(
       ResponseStatus.SERVER_ERROR,
       '서버에러가 발생했습니다.',
       '',
@@ -30,7 +39,7 @@ export class ResponseEntity<T> {
   }
 
   static ERROR_WITH(message: string): ResponseEntity<string> {
-    return new ResponseEntity<string>(ResponseStatus.SERVER_ERROR, message, '');
+    return ResponseEntity.of<string>(ResponseStatus.SERVER_ERROR, message, '');
   }
 
   @ApiProperty()

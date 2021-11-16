@@ -13,4 +13,9 @@ export class HackerNewsService {
     const url = `https://hacker-news.firebaseio.com/v0/item/${itemId}.json`;
     return restTemplate(HttpMethod.GET, url, '', HackerNewsItem);
   }
+
+  async getHackerNewsGeneric(itemId: number) {
+    const url = `https://hacker-news.firebaseio.com/v0/item/${itemId}.json`;
+    return restTemplate(HttpMethod.GET, url, '', HackerNewsItem);
+  }
 }
