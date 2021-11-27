@@ -4,6 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserName } from '@app/entity/domain/user/UserName';
 import { UserApiQueryRepository } from './UserApiQueryRepository';
+import { HtmlTemplate } from '@app/utils/HtmlTemplate';
+import { EmailRequestDto } from './dto/EmailRequestDto';
 
 @Injectable()
 export class UserApiService {
@@ -11,6 +13,7 @@ export class UserApiService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private readonly userApiQueryRepository: UserApiQueryRepository,
+    private readonly htmlTemplate: HtmlTemplate,
   ) {}
 
   getHello(): string {
@@ -27,5 +30,19 @@ export class UserApiService {
 
   async findUserName(userId: number): Promise<UserName> {
     return await this.userApiQueryRepository.findUserName(userId);
+  }
+
+  async createMailDto(
+    from: string,
+    to: string,
+    subject: string,
+    templatePath: string,
+    data: any,
+  ): Promise<EmailRequestDto> {
+    const content = await this.htmlTemplate.templateFromFile(
+      templatePath,
+      data,
+    );
+    return new EmailRequestDto(from, to, subject, content);
   }
 }

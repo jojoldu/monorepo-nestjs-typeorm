@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { WinstonModule } from 'nest-winston';
-import { getWinstonLogger } from '@app/logger/getWinstonLogger';
-import { HtmlTemplate } from '@app/template-html/HtmlTemplate';
+import { getWinstonLogger } from '@app/common-config/getWinstonLogger';
+import { HtmlTemplate } from '@app/utils/HtmlTemplate';
 
 @Module({
   imports: [
