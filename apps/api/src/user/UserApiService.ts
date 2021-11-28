@@ -37,7 +37,7 @@ export class UserApiService {
     to: string,
     subject: string,
     templatePath: string,
-    data: any,
+    data?: any,
   ): Promise<EmailRequestDto> {
     const content = await this.htmlTemplate.templateFromFile(
       templatePath,
