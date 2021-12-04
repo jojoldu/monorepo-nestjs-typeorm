@@ -10,18 +10,18 @@ export class AdminService {
   ) {}
 
   async sendMail(
-    email: string,
+    to: string,
     filePath: string,
     companyName: string,
-    link: string,
+    userName: string,
   ) {
     const template = await this.htmlTemplate.templateFromFile(filePath, {
       companyName,
-      redirectUrl: link,
+      jobSeeker: userName,
     });
     await this.mailerService.send(
       'jojoldu@gmail.com',
-      email,
+      to,
       '축하합니다',
       template,
     );
