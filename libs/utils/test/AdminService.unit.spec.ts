@@ -3,6 +3,7 @@ import { AdminService } from '@app/utils/AdminService';
 import { HtmlTemplate } from '@app/utils/HtmlTemplate';
 
 class StubMailerService extends MailerService {
+  subject: string;
   content: string;
   async send(
     from: string,
@@ -10,6 +11,7 @@ class StubMailerService extends MailerService {
     subject: string,
     content: string,
   ): Promise<void> {
+    this.subject = subject;
     this.content = content;
   }
 }
@@ -23,6 +25,7 @@ describe('AdminService', () => {
     const userName = '테스트유저';
     await service.sendMail('test@gmail.com', 'sample', companyName, userName);
 
+    expect(spy.subject).toBe('축하합니다');
     expect(spy.content).toContain(companyName);
     expect(spy.content).toContain(userName);
   });

@@ -17,7 +17,7 @@ export class AdminService {
   ) {
     const template = await this.htmlTemplate.templateFromFile(filePath, {
       companyName,
-      userName: userName,
+      jobSeeker: userName,
     });
     await this.mailerService.send(
       'jojoldu@gmail.com',
