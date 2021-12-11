@@ -1,7 +1,6 @@
 /* eslint-disable */
 import { Enum, EnumType } from 'ts-jenum';
 import { JobLevel } from '@app/entity/domain/job/JobLevel';
-import { CodeName } from '@app/entity/enum/CodeName';
 
 /** eslint-disable */
 @Enum('code')
@@ -47,6 +46,10 @@ export class EJobLevel extends EnumType<EJobLevel>() {
     return this._endYear;
   }
 
+  static findName(code: JobLevel): string {
+    return this.values().find((e) => e.equals(code))?.name;
+  }
+
   static findByYear(year: number): EJobLevel {
     return this.values().find(
       (e) => e.betweenYear(year) && e !== this.IRRELEVANT,
@@ -61,7 +64,14 @@ export class EJobLevel extends EnumType<EJobLevel>() {
     return `${this.startYear} ~ ${this.endYear}`;
   }
 
-  toCodeName(): CodeName {
-    return new CodeName(this.code, this.name);
+  equals(code: JobLevel): boolean {
+    return this.code === code;
+  }
+
+  toCodeName() {
+    return {
+      code: this.code,
+      name: this.name,
+    };
   }
 }
