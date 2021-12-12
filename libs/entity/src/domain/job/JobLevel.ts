@@ -13,8 +13,8 @@ export class JobLevel extends EnumType<JobLevel>() {
   private constructor(
     readonly _code: string,
     readonly _name: string,
-    readonly _startYear,
-    readonly _endYear,
+    readonly _startYear: number,
+    readonly _endYear: number,
   ) {
     super();
   }
@@ -36,7 +36,7 @@ export class JobLevel extends EnumType<JobLevel>() {
   }
 
   static findName(code: string): string {
-    return this.values().find((e) => e.equals(code))?.name;
+    return this.values().find((e) => e.equalsByCode(code))?.name;
   }
 
   static findByYear(year: number): JobLevel {
@@ -53,7 +53,11 @@ export class JobLevel extends EnumType<JobLevel>() {
     return `${this.startYear} ~ ${this.endYear}`;
   }
 
-  equals(code: string): boolean {
+  equals(jobLevel: JobLevel): boolean {
+    return this === jobLevel;
+  }
+
+  equalsByCode(code: string): boolean {
     return this.code === code;
   }
 
