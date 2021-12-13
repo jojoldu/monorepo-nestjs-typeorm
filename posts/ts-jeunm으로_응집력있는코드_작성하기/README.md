@@ -47,29 +47,29 @@ export class EJobLevel extends EnumType<EJobLevel>() { // (2)
 }
 ```
 
-> 저는 Enum과 구분하기 위해서 ts-jenum 클래스는 prefix로 `E`를 붙여서 사용하고, 지칭은 EClass라고 합니다.  
+> 저는 Enum과 구분하기 위해서 ts-jenum 클래스는 prefix로 `E`를 붙여서 사용하고, 지칭은 EnumClass라고 합니다.  
 > ex) `Enum: JobLevel`, `ts-jenum: EJobLevel`
 
-이후 오해를 막기 위해 `ts-jenum` 으로 만들어진 클래스들은 **EClass**라고 하겠습니다.
+이후 오해를 막기 위해 `ts-jenum` 으로 만들어진 클래스들은 **EnumClass**라고 하겠습니다.
 
 (1) `@Enum('필드명')`
-* **EClass 메인 Key**가 될 필드를 지정합니다.
+* **EnumClass 메인 Key**가 될 필드를 지정합니다.
     * 여기서는 `_code` 필드의 **getter 메소드**인 `code`를 메인 Key로 사용합니다.
 * 해당 Key는 **절대 중복이 되어선 안됩니다**
-  * EClass의 `static class` 들의 구분자 역할을 하기 때문입니다.
+  * EnumClass의 `static class` 들의 구분자 역할을 하기 때문입니다.
 
 (2) `extends EnumType<EJobLevel>()`
 
 * `ts-jenum` 이 제공하는 EnumType을 꼭 상속 받아야합니다.
-* 이때 EnumType는 제네릭 타입으로 **상속받은 EClass를 꼭 사용해야합니다**
-  * EClass 에서 제공하는 여러 편의 메소드들 (`find`, `values`, `valueByName` 등등)을 사용할때 타입 명시가 필요하기 때문입니다.
+* 이때 EnumType는 제네릭 타입으로 **상속받은 EnumClass를 꼭 사용해야합니다**
+  * EnumClass 에서 제공하는 여러 편의 메소드들 (`find`, `values`, `valueByName` 등등)을 사용할때 타입 명시가 필요하기 때문입니다.
 
 (3) `static readonly IRRELEVANT ~~`
 
-* Enum 타입을 선언하듯이 **EClass의 타입**을 선언합니다.
-* 여기서 선언된 `IRRELEVANT`, `BEGINNER`, `JUNIOR`, `MIDDLE`, `SENIOR` 등이 EClass의 타입으로 작동합니다.
+* Enum 타입을 선언하듯이 **EnumClass의 타입**을 선언합니다.
+* 여기서 선언된 `IRRELEVANT`, `BEGINNER`, `JUNIOR`, `MIDDLE`, `SENIOR` 등이 EnumClass의 타입으로 작동합니다.
 
-이렇게 작성된 EClass는 다음과 같이 활용 가능합니다.  
+이렇게 작성된 EnumClass는 다음과 같이 활용 가능합니다.  
 (간단하게 테스트 코드로 각 기능들을 검증했습니다.)
 
 ```javascript
@@ -77,7 +77,7 @@ it('ts-jenum 기본 케이스 검증', () => {
   // toString은 @Enum() 에 선언된 필드를 사용한다
   expect('' + JobLevel.IRRELEVANT).toBe(JobLevel.IRRELEVANT.code);
 
-  // values() 는 전체 EClass를 반환한다
+  // values() 는 전체 EnumClass를 반환한다
   expect(JobLevel.values()).toStrictEqual([
     JobLevel.IRRELEVANT,
     JobLevel.BEGINNER,
@@ -95,10 +95,10 @@ it('ts-jenum 기본 케이스 검증', () => {
   // enumName은 static 클래스명이 반환된다
   expect(JobLevel.MIDDLE.enumName).toBe('MIDDLE');
 
-  // find는 람다표현식으로 EClass들 사이에서 원하는 대상을 하나 찾을 수 있다.
+  // find는 람다표현식으로 EnumClass들 사이에서 원하는 대상을 하나 찾을 수 있다.
   expect(JobLevel.find((e) => e.name === '미들')).toBe(JobLevel.MIDDLE);
 
-  // filter는 람다표현식으로 EClass들 사이에서 원하는 대상들 여러개를 찾을 수 있다.
+  // filter는 람다표현식으로 EnumClass들 사이에서 원하는 대상들 여러개를 찾을 수 있다.
   expect(
     JobLevel.filter((e) => e.name === '주니어' || e.name === '미들'),
   ).toStrictEqual([JobLevel.JUNIOR, JobLevel.MIDDLE]);
@@ -109,8 +109,8 @@ it('ts-jenum 기본 케이스 검증', () => {
 
 ## 3. 예제
 
-실제 사례를 통해 한번 EClass를 어떻게 활용하면 좋을지 소개드리겠습니다.  
-예제에서 사용될 EClass 입니다.
+실제 사례를 통해 한번 EnumClass를 어떻게 활용하면 좋을지 소개드리겠습니다.  
+예제에서 사용될 EnumClass 입니다.
 
 ```js
 import { Enum, EnumType } from 'ts-jenum';
@@ -181,11 +181,43 @@ export class JobLevel extends EnumType<JobLevel>() {
 
 ### 3-1. 데이터들간 연관 관계 정리
 
+이를테면 데이터베이스에 저장된 영문자 `BEGINNER` 은 화면에서는 `인턴/신입`로 노출되어야 한다고 가정해봅니다.  
+이뿐만 아니라 `IRRELEVANT(경력무관)` `JUNIOR(주니어)` `MIDDLE(미들)` `SENIOR(시니어)` 도 마찬가지로 한세트의 데이터들입니다.  
 
+이럴 경우 리터럴 객체도 좋은 해결책이지만, **타입힌트 / 자동완성 / 상속 or 구성** 등의 확장성까지 고려한다면 클래스로 추출하기 좋은 사례인데요.  
+지금처럼 **미리 정의된 데이터 세트**안에서만 활동한다면 `ts-jenum` 의 EnumClass가 많은 도움이 됩니다.
+
+```javascript
+@Enum('code')
+export class JobLevel extends EnumType<JobLevel>() {
+  static readonly IRRELEVANT = new JobLevel('IRRELEVANT', '경력무관', 0, 99);
+  static readonly BEGINNER = new JobLevel('BEGINNER', '인턴/신입', 0, 0);
+  static readonly JUNIOR = new JobLevel('JUNIOR', '주니어', 1, 3);
+  static readonly MIDDLE = new JobLevel('MIDDLE', '미들', 4, 7);
+  static readonly SENIOR = new JobLevel('SENIOR', '시니어', 8, 20);
+
+  ....
+}
+```
+
+그리고 이렇게 관련된 데이터들을 묶어서 API로 모두 다 함께 내려줘야한다면 다음과 같이 **클래스의 메소드**로 쉽게 변환이 가능합니다.
+
+```javascript
+@Enum('code')
+export class JobLevel extends EnumType<JobLevel>() {
+  ....
+  toCodeName() {
+    return {
+      code: this.code,
+      name: this.name,
+    };
+  }
+}
+```
 
 ### 3-2. 상태와 행위 한 곳에서 관리하기
 
-이를테면, 다음과 같은 도메인 로직이 있다고 가정해봅시다.
+이를테면, 다음과 같은 도메인 로직이 있다고 가정해봅니다.
 
 * 경력무관: 0 ~ 99 년차
 * 신입/인턴: 0년차
@@ -213,10 +245,86 @@ getJobLevel(workYear) {
 ```
 
 이런 코드는 **응집력 있는 코드가 아닙니다**.  
-이후에 경력 ('workYear') 에 따른 구분값이, 로직이 더 필요할때마다 파편화된 함수들만 추가로 될 뿐입니다.  
+이후에 경력 (`workYear`) 에 따른 구분값과 도메인 로직이 필요할때마다 파현화된 함수들이 계속 추가될 뿐입니다.  
+
+이 역시 EnumClass를 활용한다면 다음과 같이 **상태와 로직을 한 곳에서** 관리할 수 있는데요.
+
+```javascript
+@Enum('code')
+export class JobLevel extends EnumType<JobLevel>() {
+  static readonly IRRELEVANT = new JobLevel('IRRELEVANT', '경력무관', 0, 99);
+  static readonly BEGINNER = new JobLevel('BEGINNER', '인턴/신입', 0, 0);
+  static readonly JUNIOR = new JobLevel('JUNIOR', '주니어', 1, 3);
+  static readonly MIDDLE = new JobLevel('MIDDLE', '미들', 4, 7);
+  static readonly SENIOR = new JobLevel('SENIOR', '시니어', 8, 20);
+  ...
+
+  // 전체 JobLevel 중 해당 연차에 포함되는 JobLevel 탐색
+  static findByYear(year: number): JobLevel {
+    return this.values().find(
+      (e) => e.betweenYear(year) && e !== this.IRRELEVANT,
+    );
+  }
+
+  // 해당 JobLevel의 연차 범위내에 포함되는지 확인
+  betweenYear(year: number): boolean {
+    return this.startYear <= year && this.endYear >= year;
+  }
+  ...
+}
+```
+
+이렇게 되면 다음과 같이 `JobLevel.findByYear(workYear)` 한 줄로 **원하는 데이터세트를 찾을 수 있습니다**
+
+```javascript
+it.each([
+  [0, '인턴/신입'],
+  [1, '주니어'],
+  [5, '미들'],
+  [11, '시니어'],
+])('연차 %s인 경우 역량 등급은 %s이다', (year, grade) => {
+  const result = JobLevel.findByYear(Number(year));
+
+  expect(result.name).toBe(grade);
+});
+```
 
 ### 3-3. 데이터 그룹 관리하기
 
+```javascript
+@Enum('code')
+export class JobLevelGroup extends EnumType<JobLevelGroup>() {
+  static readonly NEWCOMER = new JobLevelGroup('NEWCOMER', '경력직', [
+    JobLevel.BEGINNER,
+    JobLevel.JUNIOR,
+    JobLevel.IRRELEVANT,
+  ]);
+
+  static readonly EXPERIENCED = new JobLevelGroup('EXPERIENCED', '경력직', [
+    JobLevel.MIDDLE,
+    JobLevel.SENIOR,
+    JobLevel.IRRELEVANT,
+  ]);
+
+  private constructor(
+    readonly _code: string,
+    readonly _name: string,
+    readonly _jobLevels: JobLevel[],
+  ) {
+    super();
+  }
+
+  static findByJobLevel(jobLevel: JobLevel): JobLevelGroup {
+    return this.values().find((group) =>
+      group._jobLevels.some((level) => level.equals(jobLevel)),
+    );
+  }
+
+  get code(): string {
+    return this._code;
+  }
+}
+```
 
 ## 4. 마무리
 
