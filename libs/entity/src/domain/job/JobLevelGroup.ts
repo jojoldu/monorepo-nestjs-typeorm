@@ -3,7 +3,7 @@ import { JobLevel } from '@app/entity/domain/job/JobLevel';
 
 @Enum('code')
 export class JobLevelGroup extends EnumType<JobLevelGroup>() {
-  static readonly NEWCOMER = new JobLevelGroup('NEWCOMER', '경력직', [
+  static readonly NEWCOMER = new JobLevelGroup('NEWCOMER', '신입', [
     JobLevel.BEGINNER,
     JobLevel.JUNIOR,
     JobLevel.IRRELEVANT,
